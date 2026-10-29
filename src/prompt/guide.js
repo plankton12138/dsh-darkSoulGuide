@@ -39,7 +39,12 @@ export const GUIDE_RULES = `How to work:
 Citing, and what you may not do:
 - The plugin stores page titles, URLs and a one-line scope for each source. It does not store their text. So cite a link; never retype, summarise in detail, or imply you have read a page you did not open.
 - If you are not sure of a detail and no source clearly covers it, say which part is uncertain and what would settle it. "I'm not certain of the exact room" is a useful answer; an invented room is not.
-- Separate what you know from the save (exact, quotable) from what you are recalling (approximate, and should carry a source). Never blend the two into one confident sentence.`
+- Separate what you know from the save (exact, quotable) from what you are recalling (approximate, and should carry a source). Never blend the two into one confident sentence.
+
+Endings:
+- The save distinguishes one ending clearly: the First Flame flag tells you whether 传火终结 was taken. Beyond that, it cannot separate 篡火 from 传火终结, and it keeps no list of endings already seen.
+- So never report a count like "you have 2 of 4 endings". Report per ending what the save shows, and say plainly that the others are indistinguishable from the file.
+- When asked how to get an ending, give the condition and the prerequisite items, and note that the save cannot confirm it was taken.`
 
 let cache = { at: 0, text: null, pending: null }
 const CACHE_MS = 15_000
@@ -68,6 +73,15 @@ function formatState(o) {
   if (standings.length) {
     lines.push(
       `教团：${standings.map((c) => `${c.covenant} ${c.token} ${c.held}/${c.rank1}`).join('；')}`,
+    )
+  }
+  const ends = o.endings
+  if (ends?.endings) {
+    const done = ends.endings.filter((e) => e.state === 'done')
+    const avail = ends.endings.filter((e) => e.state === 'available')
+    lines.push(
+      `结局：已达成 ${done.length ? done.map((e) => e.name).join('、') : '（无法确认）'}` +
+        `${avail.length ? `；现在可触发 ${avail.map((e) => e.name).join('、')}` : ''}`,
     )
   }
   const ach = o.achievements

@@ -1,0 +1,79 @@
+{
+  "_note": "DS3 的结局与达成条件。判定依据分三级：verified（存档旗标或道具可直接确认）、inferred（条件明确但存档无对应标记，只能间接推断）、external（需要外部资料或特定操作序列）。",
+  "_why_this_file": "结局的判定旗标没有公开的名称表（各开源存档工具都没有），游戏本体的旗标名又锁在加密的 BHD 索引后。因此这里只写有依据的条件，不写猜测的旗标 ID。",
+  "_source": "https://gl.ali213.net/html/2025-1/1606771.html （游侠网《黑暗之魂3》结局触发条件一览）",
+  "endings": [
+    {
+      "id": "lord-of-cinder",
+      "name": "传火成王",
+      "alias": "游魂之王 / Lord of Cinder",
+      "order": 1,
+      "condition": "击败薪王们的化身后，在最终篝火不做任何选择，直接与化身战斗。",
+      "difficulty": "最简单，无需任何准备",
+      "verify": {
+        "level": "inferred",
+        "how": "存档能确认「已击败薪王化身」（旗标 14100800）。因此「传火成王」这个结局**已经被触发过**——它不需要额外选择。",
+        "unverifiable": "但存档不保留「你选了哪个结局」的直接记录；只能由「化身已死 + 初始之火未点燃」间接推断为传火成王。"
+      },
+      "notes": "默认结局，也是零准备就能拿到的那个。"
+    },
+    {
+      "id": "link-the-flame",
+      "name": "传火终结",
+      "alias": "Link the Flame",
+      "order": 2,
+      "condition": "在无火祭祀场（Kiln of the First Flame）取得防火女的眼眸，交给防火女；击败化身后召唤篝火旁的防火女白符。",
+      "difficulty": "中等：需要先拿到眼眸并交给防火女",
+      "prerequisites": [
+        { "name": "防火女的眼眸", "where": "无火祭祀场，击败薪王化身前的圣女位置", "inSave": false },
+        { "name": "防火女", "where": "无火祭祀场", "inSave": false },
+        { "name": "白符", "where": "击败化身后篝火旁", "inSave": false }
+      ],
+      "verify": {
+        "level": "verified",
+        "how": "旗标 14100002（The First Flame）在点燃初始之火后置位。**它为 0 就说明还没触发过这个结局。**",
+        "note": "这是四个结局里唯一能从存档直接确认「是否已达成」的——因为该旗标就是初始之火被点燃的记录。"
+      },
+      "notes": "注意：带着八个黑暗之环无法传火，但仍可选灭火或篡火。"
+    },
+    {
+      "id": "age-of-darkness",
+      "name": "时代终结",
+      "alias": "Age of Darkness（DLC2）",
+      "order": 3,
+      "condition": "完成 DLC2 环印城线：在最后的篝火选择与盖尔一同点燃初始之火（触发 The Usurper 条件链）。",
+      "difficulty": "需要 DLC2 内容与特定选项",
+      "prerequisites": [
+        { "name": "DLC2 环印城", "where": "击败奴仆骑士盖尔后开启最终篝火", "inSave": false }
+      ],
+      "verify": {
+        "level": "inferred",
+        "how": "存档能确认「已击败奴仆骑士盖尔」（旗标 15110800），这是该结局的前置。",
+        "unverifiable": "但 DLC2 结局的独立旗标名没有公开，无法确认「是否已实际触发」。"
+      },
+      "notes": "严格说它与「传火终结」共用初始之火的点火动作，差别在于最终篝火上选谁。"
+    },
+    {
+      "id": "usurpation",
+      "name": "篡火",
+      "alias": "Usurpation of Fire",
+      "order": 4,
+      "condition": "灭火结局进行到一半时攻击防火女（对她出手而非交白符）。",
+      "difficulty": "与传火终结相近，但时机要卡准",
+      "prerequisites": [
+        { "name": "防火女的眼眸", "where": "同传火终结", "inSave": false }
+      ],
+      "verify": {
+        "level": "inferred",
+        "how": "前置道具与传火终结相同，存档能确认的部分也就相同。",
+        "unverifiable": "「中途攻击防火女」这个操作不留下可读标记，无法从存档区分它与传火终结。"
+      },
+      "notes": "这是四个结局里**存档完全无法区分**的一个：它和传火终结的道具前置一模一样。"
+    }
+  ],
+  "_precedence": [
+    "同一周目只能触发一个结局，且顺序固定：传火成王 → 传火终结/篡火 → （DLC2）时代终结。",
+    "想拿全部结局必须开新周目，或从最后篝火前的存档读档。"
+  ],
+  "_cycle_note": "已触发的结局会保留在成就与记录里；判断「还缺哪个结局」需要知道每个结局的达成记录，而存档里没有这份清单——本模块只能报「当前可确认的那一个」，其余需要玩家自己记录。"
+}

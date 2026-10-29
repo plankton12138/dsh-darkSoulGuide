@@ -163,6 +163,11 @@ const OVERVIEW_OUTPUT = {
       description: 'Achievement status. Only entries the save can prove carry have/total; the rest say why they cannot be verified.',
       additionalProperties: true,
     },
+    endings: {
+      type: 'object',
+      description: 'Ending status per ending. state is one of done/available/possible/locked/ambiguous; evidence explains what the save shows. Do not report a completion count for endings the save cannot distinguish.',
+      additionalProperties: true,
+    },
     covenantStanding: {
       type: 'array',
       description: 'Turn-in progress for covenants the player has already started.',
@@ -208,6 +213,15 @@ function renderOverview(_args, v) {
   }
   if ((v.endingMarkers || []).length) {
     lines.push(`结局标记（不是漏掉的篝火）：${v.endingMarkers.join('、')}`)
+  }
+  if (v.endings?.endings) {
+    lines.push('结局：')
+    for (const e of v.endings.endings) {
+      const mark = e.state === 'done' ? '✔' : e.state === 'available' ? '○' : e.state === 'locked' ? '·' : '?'
+      lines.push(`  ${mark} ${e.name}（${e.alias}）：${e.condition}`)
+      lines.push(`     ${e.evidence}`)
+    }
+    lines.push(`  顺序：${(v.endings.precedence || []).join(' ')}`)
   }
 
   // Reachability, ordered by how soon it can be acted on. This is the section
@@ -289,6 +303,7 @@ export function registerOverviewTool(ctx) {
           },
           covenantStanding: o.reachability.covenants,
           achievements: o.achievements,
+          endings: o.endings,
         }
       },
     }),

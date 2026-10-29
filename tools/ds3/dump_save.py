@@ -410,9 +410,18 @@ COVENANT_TOKENS = frozenset({
     "Forked Pale Tongue",
     "Proof of a Concord Well Kept",
 })
+# Ending flags. Only these are exposed, and only because their meaning is
+# known: the game's full flag-name table sits behind an encrypted BHD index, so
+# no complete list is available. 14100002 is the First Flame being lit, which
+# is the one ending flag that is directly meaningful.
+ENDING_FLAGS = {
+    14100002: "初始之火已点燃（传火终结）",
+    14100800: "薪王们的化身已击败",
+    15110800: "奴仆骑士盖尔已击败（DLC2）",
+}
+
 BOSS_FLAGS = {
-    14000800: "灰烬审判者古达",    13000800: "冷冽谷的波尔多", 13100800: "诅咒树妖",
-    13300800: "深渊监视者", 13300850: "结晶长老", 13500800: "深邃主教群",
+    14000800: "灰烬审判者古达",    13000800: "冷冽谷的波尔多", 13100800: "诅咒树妖",    13300800: "深渊监视者", 13300850: "结晶长老", 13500800: "深邃主教群",
     13800800: "霸王沃尼尔", 13800830: "老恶魔王", 13700850: "教宗沙力万",
     13700800: "吞噬神明的艾尔德利奇", 13900800: "巨人尤姆", 13000890: "冷冽谷的舞娘",
     13000830: "祭祀场主教奥斯罗艾斯", 13010800: "猎龙铠甲", 13410830: "双子王子",
@@ -690,6 +699,8 @@ def load(path):
             c["area"] = meta["area"]
             c["bonfire"] = meta["bonfire"]
         blob = flag_blob_offset(plain)
+        c["flagBlob"] = blob
+        c["payload"] = plain
         c["bosses"] = None
         c["bonfires"] = None
         if blob is not None:
@@ -809,6 +820,19 @@ def sections_for(c):
                 ],
             },
         }
+    # Ending-related flags. Only the ones that can be read with a known meaning
+    # are exposed — the game's flag names sit behind an encrypted index, so no
+    # full table is available. 14100002 is the First Flame being lit, which is
+    # the one ending flag that is directly meaningful.
+    blob = c.get("flagBlob")
+    if c.get("bosses") is not None and blob is not None:
+            end_flags = {}
+            for fid, label in ENDING_FLAGS.items():
+                end_flags[str(fid)] = {"label": label, "value": read_flag(c["payload"], blob, fid)}
+            sec["endings"] = {
+                "description": "结局相关旗标：初始之火是否点燃、薪王化身与盖尔是否已击败",
+                "data": {"flags": end_flags},
+            }
     return sec
 
 

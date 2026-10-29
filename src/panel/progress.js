@@ -73,6 +73,7 @@ export async function buildProgress() {
     // than recomputing rules in the client.
     reachability: o.reachability,
     achievements: o.achievements,
+    endings: o.endings,
     edges: routes.edges.map((e) => ({ from: e.from, to: e.to })),
     updatedAt: new Date().toISOString(),
   }

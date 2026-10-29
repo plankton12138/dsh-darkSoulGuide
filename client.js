@@ -476,6 +476,63 @@ window.__ModuleLoader__.load({
       note: { label: '说明', color: C.sub },
     }
 
+    /**
+     * Endings: the condition, and what the save says about it.
+     *
+     * Each row states its own evidence. Two of the four endings leave no
+     * readable mark in the save, so they are shown as "unverifiable" rather than
+     * counted — a completion count here would be a guess.
+     */
+    function EndingList({ d }) {
+      const e = d.endings
+      if (!e?.endings) return null
+      const MARK = {
+        done: { icon: '✔', color: C.done, label: '已达成' },
+        available: { icon: '○', color: C.curr, label: '现在可拿' },
+        possible: { icon: '?', color: C.warn, label: '存档看不出' },
+        locked: { icon: '·', color: C.sub, label: '未解锁' },
+        ambiguous: { icon: '?', color: C.warn, label: '无法区分' },
+      }
+      return h(
+        'div',
+        { style: { marginTop: 16 } },
+        h('div', { style: { fontSize: 12, color: C.text, marginBottom: 6, fontWeight: 600 } }, '结局'),
+        h(
+          'div',
+          { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
+          e.endings.map((x) => {
+            const m = MARK[x.state] || MARK.possible
+            return h(
+              'div',
+              {
+                key: x.id,
+                style: {
+                  border: `1px solid ${C.border}`, borderRadius: 6,
+                  padding: '6px 10px', borderLeft: `3px solid ${m.color}`,
+                },
+              },
+              h(
+                'div',
+                { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                h('span', { style: { color: m.color, fontSize: 12 } }, m.icon),
+                h('span', { style: { fontSize: 12, color: C.text, flex: 1 } }, x.name),
+                h('span', { style: { fontSize: 10, color: m.color, whiteSpace: 'nowrap' } }, m.label),
+              ),
+              h('div', { style: { fontSize: 11, color: C.sub, marginTop: 2 } }, x.condition),
+              h('div', { style: { fontSize: 10, color: C.sub, marginTop: 2, opacity: 0.85 } }, x.evidence),
+            )
+          }),
+          e.precedence && e.precedence.length
+            ? h(
+                'div',
+                { style: { fontSize: 10, color: C.sub, marginTop: 4, lineHeight: 1.6 } },
+                e.precedence.join(' '),
+              )
+            : null,
+        ),
+      )
+    }
+
     /** A row of one-click questions, for the things players ask most. */
     function QuickAsks() {
       const items = [
@@ -978,6 +1035,7 @@ window.__ModuleLoader__.load({
         h(MapCanvas, { d }),
         legend,
         h(NextSteps, { d }),
+        h(EndingList, { d }),
         h(AchievementList, { d }),
         hint,
       )
@@ -1044,6 +1102,7 @@ window.__ModuleLoader__.load({
         // missing.
         h(QuickAsks, {}),
         h(NextSteps, { d }),
+        h(EndingList, { d }),
         h(AchievementList, { d }),
       )
     }

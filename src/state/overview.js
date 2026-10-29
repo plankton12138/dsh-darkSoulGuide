@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readSection } from '../parsers/ds3/run.js'
 import { buildAxes, summarize } from './progress.js'
+import { endingStatus } from './endings.js'
 import { achievementStatus } from './achievements.js'
 import {
   classifyGaps,
@@ -71,12 +72,13 @@ function endingMarkers(unlit) {
  */
 export async function overview(saveId) {
   const characters = await readSection(saveId, 'character')
-  const [bonfires, bosses, progress, inventory, equipment] = await Promise.all([
+  const [bonfires, bosses, progress, inventory, equipment, endings] = await Promise.all([
     readSection(saveId, 'bonfires'),
     readSection(saveId, 'bosses'),
     readSection(saveId, 'progress'),
     readSection(saveId, 'inventory'),
     readSection(saveId, 'equipment'),
+    readSection(saveId, 'endings'),
   ])
 
   const { items } = await reference()
@@ -111,6 +113,16 @@ export async function overview(saveId) {
   for (const [id, name] of Object.entries(items.weapon)) {
     if (owned.has(Number(id))) allNames.add(name)
   }
+  // Endings: the flags the parser exposes, read as a plain id -> 0/1 map.
+  const endingFlags = {}
+  for (const [fid, info] of Object.entries(endings?.data?.flags ?? {})) {
+    endingFlags[fid] = info.value
+  }
+  const ending = await endingStatus({
+    flags: endingFlags,
+    killedBosses: bosses.data.killed ?? [],
+  })
+
   const achievements = achievementStatus({
     owned,
     bagNames: allNames,
@@ -151,5 +163,6 @@ export async function overview(saveId) {
       souls,
     },
     achievements,
+    endings: ending,
   }
 }

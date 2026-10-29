@@ -143,12 +143,14 @@ export function achievementStatus({ owned, bagNames, rings, axes, bosses }) {
     verifiable: false,
     reason: '碎片在拾取时即被消耗，存档不留计数器。',
   })
+  // Endings are tracked by their own module, which reports per-ending what
+  // the save shows. Listing them here as unverifiable would contradict it.
   entries.push({
     id: 'endings',
     name: '全部结局',
     group: 'story',
     verifiable: false,
-    reason: '结局是分支选择，不进存档旗标。',
+    reason: '存档只保留初始之火是否点燃，无法分辨篡火与传火终结，也没有已触发结局的清单。逐个结局的状态见结局模块。',
   })
 
   const verifiable = entries.filter((e) => e.verifiable)
