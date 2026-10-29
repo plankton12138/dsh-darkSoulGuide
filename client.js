@@ -244,6 +244,48 @@ window.__ModuleLoader__.load({
     // while looking complete. One component per block prevents that drift.
     // ---------------------------------------------------------------------
 
+    /**
+     * Save-read failure, with the next step rather than just the symptom.
+     *
+     * Anyone installing this from the public repository starts without a save
+     * file, so this is the first screen most new users see. "读不到存档" alone
+     * is a dead end; the hint is what turns it into something actionable.
+     */
+    function SaveError({ d, error, compact }) {
+      const reason = d?.reason || error || '未知原因'
+      const hint = d?.hint || null
+      const code = d?.code || null
+      const pad = compact ? 16 : 24
+      const size = compact ? 12 : 13
+      return h(
+        'div',
+        { style: { padding: pad, color: C.sub, fontSize: size, lineHeight: 1.8, fontFamily: 'inherit' } },
+        h('div', { style: { color: C.warn, marginBottom: 6 } }, `读不到存档：${reason}`),
+        hint ? h('div', null, hint) : null,
+        code === 'no_save'
+          ? h(
+              'div',
+              { style: { marginTop: 8, opacity: 0.85 } },
+              '装好插件但还没进过游戏？先创建角色并保存一次，再刷新这里。',
+            )
+          : null,
+        code === 'python_missing'
+          ? h(
+              'div',
+              { style: { marginTop: 8, opacity: 0.85 } },
+              '解析器需要本机的 Python 3。装好后重开应用。',
+            )
+          : null,
+        code === 'dependency_missing'
+          ? h(
+              'div',
+              { style: { marginTop: 8, opacity: 0.85 } },
+              '需要 cryptography：在终端执行 pip install cryptography。',
+            )
+          : null,
+      )
+    }
+
     const RANK_STYLE = {
       now: { label: '现在就能做', color: C.curr },
       grind: { label: '需要刷', color: C.warn },
@@ -603,9 +645,7 @@ window.__ModuleLoader__.load({
       )
 
       if (st.loading) return h('div', { style: { padding: 24, color: C.sub } }, '读取存档…')
-      if (!d || !d.ok) {
-        return h('div', { style: { padding: 24, color: C.sub } }, `读不到存档：${d?.reason || st.error || '未知原因'}`)
-      }
+      if (!d || !d.ok) return h(SaveError, { d, error: st.error })
 
       const axes = h(
         'div',
@@ -685,13 +725,7 @@ window.__ModuleLoader__.load({
       const st = useProgress(60000)
       const d = st.data
       if (st.loading) return h('div', { style: { padding: 16, color: C.sub, fontSize: 12 } }, '读取存档…')
-      if (!d || !d.ok) {
-        return h(
-          'div',
-          { style: { padding: 16, color: C.sub, fontSize: 12 } },
-          `读不到存档：${d?.reason || st.error || '未知原因'}`,
-        )
-      }
+      if (!d || !d.ok) return h(SaveError, { d, error: st.error, compact: true })
       const left = (d.summary || []).filter((r) => r.have < r.total)
       return h(
         'div',
