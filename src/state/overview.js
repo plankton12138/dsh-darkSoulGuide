@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readSection } from '../parsers/ds3/run.js'
 import { buildAxes, summarize } from './progress.js'
+import { achievementStatus } from './achievements.js'
 import {
   classifyGaps,
   covenantStanding,
@@ -77,6 +78,33 @@ export async function overview(saveId) {
   const tokens = inventory.data.covenantTokens ?? {}
   const souls = transposableSouls(new Set(inventory.data.bossSouls ?? []), bosses.data.killed ?? [])
 
+  const bagNames = new Set(
+    (inventory.data.keyItems ?? []).concat(
+      (inventory.data.bossSouls ?? []),
+      Object.keys(tokens),
+    ),
+  )
+  // The achievement view needs every display name, not just key items, so it
+  // re-derives names from the reference tables against the owned id set.
+  const allNames = new Set(bagNames)
+  for (const [id, name] of Object.entries(items.good)) {
+    if (owned.has(Number(id))) allNames.add(name)
+  }
+  for (const [id, name] of Object.entries(items.weapon)) {
+    if (owned.has(Number(id))) allNames.add(name)
+  }
+  const achievements = achievementStatus({
+    owned,
+    bagNames: allNames,
+    rings: items.ring,
+    axes,
+    bosses: {
+      killed: bosses.data.killedCount,
+      total: bosses.data.killedCount + bosses.data.aliveCount,
+      alive: bosses.data.alive,
+    },
+  })
+
   return {
     save_id: saveId,
     character: {
@@ -101,5 +129,6 @@ export async function overview(saveId) {
       covenants: covenantStanding(tokens),
       souls,
     },
+    achievements,
   }
 }

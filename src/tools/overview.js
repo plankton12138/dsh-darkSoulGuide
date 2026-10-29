@@ -149,6 +149,11 @@ const OVERVIEW_OUTPUT = {
         },
       },
     },
+    achievements: {
+      type: 'object',
+      description: 'Achievement status. Only entries the save can prove carry have/total; the rest say why they cannot be verified.',
+      additionalProperties: true,
+    },
     covenantStanding: {
       type: 'array',
       description: 'Turn-in progress for covenants the player has already started.',
@@ -217,6 +222,17 @@ function renderOverview(_args, v) {
     lines.push(`本轮可补：${ready.gaps.length} 项（非教团、非 NG+）`)
   }
 
+  const ach = v.achievements
+  if (ach && ach.entries) {
+    lines.push('成就（仅列存档能验证的）：')
+    for (const e of ach.entries) {
+      if (!e.verifiable) continue
+      const mark = e.have >= e.total ? '✔' : `${e.have}/${e.total}`
+      const miss = e.missing && e.missing.length ? `　缺：${e.missing.slice(0, 6).join('、')}${e.missing.length > 6 ? ` 等 ${e.missing.length} 项` : ''}` : ''
+      lines.push(`  ${mark}  ${e.name}${miss}`)
+    }
+    lines.push(`无法从存档验证：${ach.entries.filter((e) => !e.verifiable).map((e) => e.name).join('、')}`)
+  }
   return [{ type: 'text', text: lines.join('\n') }]
 }
 
@@ -259,6 +275,7 @@ export function registerOverviewTool(ctx) {
             ngPlusOnly: o.reachability.gaps.ngPlus,
           },
           covenantStanding: o.reachability.covenants,
+          achievements: o.achievements,
         }
       },
     }),

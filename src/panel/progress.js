@@ -39,6 +39,7 @@ export async function buildProgress() {
     // Reachability: the panel's "next step" list is built from these rather
     // than recomputing rules in the client.
     reachability: o.reachability,
+    achievements: o.achievements,
     edges: routes.edges.map((e) => ({ from: e.from, to: e.to })),
     updatedAt: new Date().toISOString(),
   }

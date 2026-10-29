@@ -65,7 +65,14 @@ function formatState(o) {
       `教团：${standings.map((c) => `${c.covenant} ${c.token} ${c.held}/${c.rank1}`).join('；')}`,
     )
   }
-  const eq = o.equipment || {}
+  const ach = o.achievements
+  if (ach?.entries) {
+    const ok = ach.entries.filter((e) => e.verifiable)
+    const done = ok.filter((e) => e.have >= e.total)
+    lines.push(`成就（可验证 ${ok.length} 项，已完成 ${done.length}）：${ok.map((e) => `${e.name} ${e.have}/${e.total}`).join('；')}`)
+    const un = ach.entries.filter((e) => !e.verifiable).map((e) => e.name)
+    if (un.length) lines.push(`无法从存档验证：${un.join('、')}（不要估算这些）`)
+  }  const eq = o.equipment || {}
   const worn = Object.entries(eq)
     .filter(([, v]) => v)
     .map(([, v]) => v)
