@@ -66,6 +66,7 @@ export async function buildProgress() {
     // The strip and the map both read these, so one set of axes serves both.
     summary: o.summary,
     missingByArea: o.missingByArea,
+    endingMarkers: o.endingMarkers ?? [],
     equipment: o.equipment,
     stats: o.character.stats,
     // Reachability: the panel's "next step" list is built from these rather

@@ -297,6 +297,8 @@ window.__ModuleLoader__.load({
         // A node with bonfires still unlit is actionable: clicking asks how to
         // reach them. Nodes that are done or have no data stay inert so the map
         // does not offer clicks that lead nowhere.
+        // The Host already separated real bonfires from ending markers, so
+        // this list cannot contain a marker that has no bonfire to reach.
         const missing = (d.missingByArea || {})[name] || []
         const clickable = missing.length > 0
         const status = nodeStatus[name] || 'idle'
@@ -858,7 +860,7 @@ window.__ModuleLoader__.load({
       // 2. Bonfires: concrete, located, one trip each.
       const byArea = d.missingByArea || {}
       for (const [area, list] of Object.entries(byArea)) {
-        const real = list.filter((l) => !/First Flame/i.test(l))
+        const real = list
         if (!real.length) continue
         out.push({
           rank: 'now',
@@ -867,11 +869,13 @@ window.__ModuleLoader__.load({
           ask: askAboutArea(area, real),
         })
       }
-      if (byArea['无火祭祀场']?.some((l) => /First Flame/i.test(l))) {
+      // Ending markers are reported, never counted as a missing bonfire: the
+      // Host separates them from the gaps, so nothing here has to re-check.
+      for (const marker of d.endingMarkers || []) {
         out.push({
           rank: 'note',
-          title: '无火祭祀场：The First Flame',
-          detail: '这是结局分支标记，通常不算漏，按你的结局选择决定。',
+          title: `结局标记：${marker.split(' - ').slice(1).join(' - ')}`,
+          detail: '这是结局分支的记录，不是漏掉的篝火 —— 只在你选择点燃初始之火时才会变化。',
         })
       }
 

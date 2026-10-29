@@ -92,7 +92,16 @@ const OVERVIEW_OUTPUT = {
       },
     },
     equipment: { type: 'object', additionalProperties: true },
-    missingByArea: { type: 'object', additionalProperties: true },
+    missingByArea: {
+      type: 'object',
+      additionalProperties: true,
+      description: 'Unlit BONFIRES by area. Contains real bonfires only.',
+    },
+    endingMarkers: {
+      type: 'array',
+      description: 'Unlit flags that are ending records rather than bonfires, e.g. The First Flame. Never report these as a missing bonfire.',
+      items: { type: 'string' },
+    },
     readyNow: {
       type: 'object',
       additionalProperties: false,
@@ -197,6 +206,9 @@ function renderOverview(_args, v) {
     lines.push('篝火缺口：')
     for (const [area, list] of areas) lines.push(`  ${area}：${list.map((l) => l.split(' - ').slice(1).join(' - ')).join('、')}`)
   }
+  if ((v.endingMarkers || []).length) {
+    lines.push(`结局标记（不是漏掉的篝火）：${v.endingMarkers.join('、')}`)
+  }
 
   // Reachability, ordered by how soon it can be acted on. This is the section
   // that turns counts into a decision, so it goes last and gets a heading.
@@ -268,6 +280,7 @@ export function registerOverviewTool(ctx) {
           covenants: o.axes.covenants,
           equipment: o.equipment,
           missingByArea: o.missingByArea,
+          endingMarkers: o.endingMarkers ?? [],
           readyNow: {
             souls: o.reachability.souls,
             gaps: o.reachability.gaps.now.slice(0, 40),

@@ -33,15 +33,33 @@ async function reference() {
   return tables
 }
 
+/**
+ * Bonfire labels that are not actually bonfires.
+ *
+ * `The First Flame` records the ending where the First Flame is lit, not a
+ * bonfire. The game stores it in the bonfire table, so a cleared character
+ * shows it as "missing" forever. It is separated here, at the source, so no
+ * consumer has to remember to filter it — the client-side filter that used to
+ * exist in two places is what let the map ask how to reach a bonfire that
+ * does not exist.
+ */
+const NOT_A_BONFIRE = /First Flame/i
+
 /** Areas whose bonfires are not all lit, mapped to what is missing. */
 function missingByArea(unlit) {
   const out = new Map()
   for (const label of unlit) {
+    if (NOT_A_BONFIRE.test(label)) continue
     const area = label.split(' - ')[0]
     if (!out.has(area)) out.set(area, [])
     out.get(area).push(label)
   }
   return out
+}
+
+/** The non-bonfire markers, kept separate so they can be reported honestly. */
+function endingMarkers(unlit) {
+  return (unlit || []).filter((l) => NOT_A_BONFIRE.test(l))
 }
 
 /**
@@ -124,6 +142,9 @@ export async function overview(saveId) {
     summary: summarize(axes),
     equipment: equipment.data,
     missingByArea: Object.fromEntries(missingByArea(bonfires.data.unlit ?? [])),
+    // Kept apart from the gaps: this is an ending marker, not something the
+    // player forgot. Reported, never counted as a miss.
+    endingMarkers: endingMarkers(bonfires.data.unlit ?? []),
     reachability: {
       gaps,
       covenants: covenantStanding(tokens),
