@@ -243,6 +243,7 @@ export function registerTools(ctx) {
                 additionalProperties: false,
                 properties: {
                   area: { type: 'string' },
+                  transport: { type: 'string', description: 'warp when a bonfire is lit there, otherwise walk.' },
                   hops: { type: 'integer' },
                   path: { type: 'array', items: { type: 'string' } },
                   missing: { type: 'array', items: { type: 'string' } },
@@ -343,11 +344,17 @@ async function planRouteFor(args) {
       ? args.targets
       : [...missingByArea.keys()]
 
-  const plan = planRoute({ from, targets })
+  // Areas whose bonfire is already lit act as warp points, so the planner must
+  // not report them as a walk across the connectivity graph.
+  const litAreas = (bonfires.data.byArea || [])
+    .filter((a) => a.lit > 0)
+    .map((a) => a.area)
+  const plan = planRoute({ from, targets, litAreas })
   return {
     from,
     stops: plan.stops.map((s) => ({
       area: s.area,
+      transport: s.transport,
       hops: s.hops,
       path: s.path,
       missing: missingByArea.get(s.area) ?? [],
@@ -355,14 +362,20 @@ async function planRouteFor(args) {
       uncertain: s.uncertain,
     })),
     unreachable: plan.unreachable,
+    warpsAvailable: plan.warpsAvailable,
   }
 }
 
 function renderRoute(value) {
-  const lines = [`从「${value.from}」出发，按就近顺序：`]
+  const warpCount = value.stops.filter((s) => s.transport === 'warp').length
+  const lines = [`从「${value.from}」出发：`]
+  if (warpCount) {
+    lines.push(`（${warpCount} 个区域已点亮篝火，可直接传送，不需要走路）`)
+  }
   value.stops.forEach((s, i) => {
     const miss = s.missing.length ? `缺 ${s.missing.length} 个：${s.missing.join('、')}` : ''
-    lines.push(`${i + 1}. ${s.area}（${s.hops} 跳）${miss ? '｜' + miss : ''}`)
+    const how = s.transport === 'warp' ? '传送' : `${s.hops} 跳步行`
+    lines.push(`${i + 1}. ${s.area}（${how}）${miss ? '｜' + miss : ''}`)
     if (s.requires.length) lines.push(`   前置：${s.requires.join('；')}`)
     if (s.uncertain.length) lines.push(`   存疑路段：${s.uncertain.join('；')}`)
   })

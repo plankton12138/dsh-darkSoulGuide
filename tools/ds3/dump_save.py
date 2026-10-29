@@ -584,6 +584,31 @@ def classify_item(item_id):
     return None
 
 
+def resolve_item_name(item_id, category, maps):
+    """Display name for an inventory id, including its upgrade level.
+
+    Weapons and rings store the upgrade level in the low digits of the id
+    (Vordt's Great Hammer +5 is 8180005, base 8180000), so a plain dict lookup
+    misses every upgraded item and reports it as unnamed. The equipment parser
+    already handled this; the inventory grid did not.
+    """
+    table = maps.get(category, {})
+    name = table.get(item_id)
+    if name is not None:
+        return name
+    if category == "weapon":
+        for level in range(1, 11):
+            base = item_id - level
+            if base in table:
+                return "%s +%d" % (table[base], level)
+    elif category == "ring":
+        for tier in range(1, 4):
+            full = (item_id - tier) | 0x20000000
+            if full in table:
+                return "%s +%d" % (table[full], tier)
+    return None
+
+
 def scan_grid(payload, start, maps):
     items = []
     off = start
@@ -600,7 +625,7 @@ def scan_grid(payload, start, maps):
             "category": category,
             "id": item_id,
             "count": u32(payload, off + INV_COUNT),
-            "name": maps.get(category, {}).get(item_id),
+            "name": resolve_item_name(item_id, category, maps),
         })
         gap = 0
         off += INV_RECORD

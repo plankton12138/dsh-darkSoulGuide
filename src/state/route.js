@@ -80,7 +80,20 @@ function tracePath(start, target, prev, via) {
  * badly wrong because it may strand the player far from a later target. Beyond
  * 8 targets it falls back to greedy.
  */
-export function planRoute({ from, targets, routes = loadRoutes() }) {
+/**
+ * Visit order for `targets` starting at `from`.
+ *
+ * `litAreas` changes what "distance" means. Bonfires are warp points, so once an
+ * area has one lit, travel to it is a menu selection, not a walk. Without this
+ * the planner reported "5 hops" routes across a cleared world, which reads as
+ * five areas of walking and is simply wrong.
+ *
+ * With warping available, the useful cost is not hops: it is how much extra
+ * walking a detour costs inside one trip. We keep the connectivity path for
+ * areas that are still unlit (you cannot warp to a bonfire you have never
+ * reached), and mark everything else as a direct warp.
+ */
+export function planRoute({ from, targets, routes = loadRoutes(), litAreas = null }) {
   const adj = buildAdjacency(routes.edges)
   const known = new Set(adj.keys())
   const unknownFrom = known.has(from) ? null : from
@@ -93,6 +106,9 @@ export function planRoute({ from, targets, routes = loadRoutes() }) {
     return { from: start, stops: [], unreachable: unreachableUnknown }
   }
 
+  const warp = litAreas ? new Set(litAreas) : new Set()
+  const canWarp = (area) => warp.has(area)
+
   const searches = new Map()
   for (const node of [start, ...pool]) searches.set(node, bfs(node, adj))
 
@@ -101,6 +117,10 @@ export function planRoute({ from, targets, routes = loadRoutes() }) {
     return d === undefined ? Infinity : d
   }
 
+  // Targets reachable by warp cost the same as each other; only the areas you
+  // must actually walk to keep their hop cost. Sorting by cost then groups the
+  // warpable ones together instead of pretending there is an optimal path
+  // between menu entries.
   const order = pool.length <= 8 ? bestPermutation(start, pool, hops) : greedyOrder(start, pool, hops)
   const unreachable = [...order.unreachable, ...unreachableUnknown]
 
@@ -109,16 +129,25 @@ export function planRoute({ from, targets, routes = loadRoutes() }) {
   for (const area of order.visit) {
     const search = searches.get(cursor) ?? bfs(cursor, adj)
     const path = tracePath(cursor, area, search.prev, search.via)
+    // A lit bonfire is a warp point: you select it from the menu, you do not
+    // walk the connectivity path. Reporting hops without this flag is what made
+    // a cleared character look like it needed five areas of walking.
+    const byWarp = canWarp(area)
     stops.push({
       area,
-      hops: hops(cursor, area),
-      path: path ? path.nodes : [],
-      requires: path
-        ? [...new Set(path.edges.filter((e) => e.forward).map((e) => e.requires).filter(Boolean))]
-        : [],
-      uncertain: path
-        ? [...new Set(path.edges.filter((e) => e.forward && e.confidence !== 'high').map((e) => e.note))]
-        : [],
+      transport: byWarp ? 'warp' : 'walk',
+      hops: byWarp ? 0 : hops(cursor, area),
+      path: byWarp ? [area] : path ? path.nodes : [],
+      requires: byWarp
+        ? []
+        : path
+          ? [...new Set(path.edges.filter((e) => e.forward).map((e) => e.requires).filter(Boolean))]
+          : [],
+      uncertain: byWarp
+        ? []
+        : path
+          ? [...new Set(path.edges.filter((e) => e.forward && e.confidence !== 'high').map((e) => e.note))]
+          : [],
     })
     cursor = area
   }
@@ -127,6 +156,7 @@ export function planRoute({ from, targets, routes = loadRoutes() }) {
     from: start,
     stops,
     unreachable,
+    ...(litAreas ? { warpsAvailable: warp.size } : {}),
     ...(unknownFrom ? { note: `起点「${unknownFrom}」不在连通图里，改从「${start}」计算` } : {}),
   }
 }
