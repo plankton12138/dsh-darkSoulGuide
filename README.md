@@ -96,3 +96,11 @@ plugin_manager install_bundle target=<本目录绝对路径>
 
 存档容器与加密格式来自 [DS3SaveUnpacker](https://github.com/tremwil/DS3SaveUnpacker)（MIT）。
 旗标编码、装备/背包偏移、物品名称表参考 [ds3-advisor](https://github.com/mozartdiniz/ds3-advisor)（该项目**未发布许可证**）——本项目只采用其中的**格式事实**（偏移、编码规则、游戏数据），代码为独立实现。
+
+## 授权
+
+代码：[MIT](LICENSE)。
+
+游戏数据与商标说明见 [NOTICE.md](NOTICE.md)。
+
+**本仓库不含任何存档文件、Steam 账号信息或游戏资源。** 存档属于个人数据，相关路径已在 .gitignore 中永久排除。
