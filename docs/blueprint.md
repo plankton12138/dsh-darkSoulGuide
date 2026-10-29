@@ -320,7 +320,21 @@ darksoulGuide/
 
 ### 需要写对的三件事（都是踩坑得到的）
 
-1. **`inject` 决定服务可见性，不是加载顺序。** 没在 `inject` 里声明 `webServer`，`ctx.get('webServer')` 返回 `undefined` 且**不报错**——路由被 `if (server)` 静默跳过，表现为 404。声明后立刻正常。
+1. **`inject` 决定服务可见性，不是加载顺序。** 没在 `inject` 里声明 `webServer`，`ctx.get('webServer')` 返回 `undefined` 且**不报错**——路由被静默跳过，表现为 **404 + 空响应体**，前端报 `Unexpected end of JSON input`。
+   
+   **这个错犯过两次。** 0.3 拆分 config 时为了「让预设作用域不卡 pending」，把 `webServer` 从静态 `inject` 里拿掉了，于是路由再次静默消失。
+   
+   正解不是二选一，而是用**运行时可选注入**：
+   
+   ```js
+   ctx.inject(['webServer'], (scope) => {
+     const webServer = scope.webServer
+     if (!webServer) return
+     return webServer.register({ kind: 'exact', path: ROUTE, handler })
+   })
+   ```
+   
+   `ctx.inject(deps, cb)` 不参与激活门控，只在服务可用时回调，随作用域销毁——所以预设那半（没有 webServer）不会卡住，profile 那半（有 webServer）能正常注册。
 2. **客户端模块不会热重载。** Host 侧改代码会 HMR，但 `client.js` 的改动必须**完全退出应用**才重新扫描模块表。
 3. **左侧栏入口 = `sidebar.panellist` + `main` 一对**，两者的 `id` / `key` 必须同值。参考 `dsh-context` 的实现。
 

@@ -15,10 +15,19 @@ import { buildProgress } from './src/panel/progress.js'
 
 export const name = 'darksouls-guide'
 
-// `tools` is required: every configuration registers something model-facing.
-// `webServer` and `systemPrompt` are read with ctx.get() instead, because the
-// preset scope may not expose them and a hard dependency would leave the row
-// pending forever.
+// `tools` is the only hard dependency: both mounts register tools, and it is
+// present in every scope this module loads into.
+//
+// `webServer` is deliberately NOT listed here, and this was a real bug: with it
+// undeclared, `ctx.get('webServer')` returned undefined without any error, the
+// route registration was skipped silently, and the panel got a 404 with an empty
+// body — surfacing in the UI as "Unexpected end of JSON input". Listing it as a
+// hard dependency is not the fix either: the preset row mounts inside an agent
+// scope that does not provide webServer, so that row would sit pending forever
+// and the tools would never register.
+//
+// The correct mechanism is a runtime optional injection (see registerPanel):
+// Cordis calls back when the service is available and disposes with the scope.
 export const inject = ['tools']
 
 const ROUTE = '/darksouls-guide/progress'
@@ -33,12 +42,21 @@ function send(res, body) {
   res.end(payload)
 }
 
+/**
+ * Register the progress route when `webServer` exists in this scope.
+ *
+ * `ctx.inject(deps, callback)` is Cordis's runtime optional injection: unlike
+ * the static `inject` export it does not gate activation, it fires when the
+ * service becomes available and unwinds with the scope. That is exactly the
+ * semantics needed here, because this module loads into two scopes and only one
+ * of them has an HTTP server.
+ */
 function registerPanel(ctx) {
-  const webServer = ctx.get('webServer')
-  if (!webServer || typeof webServer.register !== 'function') return
+  ctx.inject(['webServer'], (scope) => {
+    const webServer = scope.webServer
+    if (!webServer || typeof webServer.register !== 'function') return
 
-  ctx.effect(() =>
-    webServer.register({
+    return webServer.register({
       kind: 'exact',
       path: ROUTE,
       handler: async (req, res) => {
@@ -46,11 +64,13 @@ function registerPanel(ctx) {
           if (req.url?.includes('fresh=1')) invalidate()
           send(res, await buildProgress())
         } catch (err) {
+          // Always answer with valid JSON: an empty body is what made the panel
+          // show "Unexpected end of JSON input" instead of the real reason.
           send(res, { ok: false, reason: String(err?.message ?? err) })
         }
       },
-    }),
-  )
+    })
+  })
 }
 
 export function apply(ctx, config = {}) {

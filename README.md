@@ -105,3 +105,13 @@ plugin_manager install_bundle target=<本目录绝对路径>
 游戏数据与商标说明见 [NOTICE.md](NOTICE.md)。
 
 **本仓库不含任何存档文件、Steam 账号信息或游戏资源。** 存档属于个人数据，相关路径已在 .gitignore 中永久排除。
+
+## 自检
+
+面板读不到存档时，先跑冒烟测试定位是「路由没注册」还是「解析失败」：
+
+```powershell
+node tests\smoke-progress.mjs http://127.0.0.1:<端口>
+```
+
+它区分三种失败：连不上（应用没开）、404（路由未注册——通常是 `webServer` 没注入）、空响应体（处理器崩溃）。**这三种在界面上都可能显示成同一句 `Unexpected end of JSON input`。**
