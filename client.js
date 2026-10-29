@@ -5,6 +5,154 @@ window.__ModuleLoader__.load({
     const h = React.createElement
     const { useEffect, useState, useRef } = React
 
+    // ------------------------------------------------------------------
+    // A one-line bus between surfaces that cannot see each other's props.
+    //
+    // `inputActions` — the only thing that can put text into the composer — is
+    // provided to composer slots, while the progress map lives in a `main` slot
+    // that has no access to it. The slots share no context, so a click in the
+    // map cannot reach the draft by props alone. A window CustomEvent is used
+    // rather than a guessed service because it is the one cross-surface
+    // mechanism that is certainly present in the browser.
+    //
+    // The bus carries a question, never an answer: a surface publishes "the
+    // user wants to ask X", and the composer-side helper fills the draft.
+    // ------------------------------------------------------------------
+
+    const BUS = 'darksouls-guide:ask'
+    const busListeners = new Set()
+    let busPending = null
+
+    function publishAsk(text) {
+      if (!text) return false
+      busPending = { text, at: Date.now() }
+      for (const fn of busListeners) {
+        try {
+          fn(busPending)
+        } catch {
+          /* one bad listener must not break the others */
+        }
+      }
+      try {
+        window.dispatchEvent(new CustomEvent(BUS, { detail: busPending }))
+      } catch {
+        /* the direct listeners above already covered it */
+      }
+      return busListeners.size > 0
+    }
+
+    function takeAsk() {
+      const p = busPending
+      busPending = null
+      return p
+    }
+
+    function onAsk(fn) {
+      busListeners.add(fn)
+      return () => busListeners.delete(fn)
+    }
+
+    /**
+     * Put a question into the composer draft.
+     *
+     * `insertText` is an undoable insertion at the caret and is refused when the
+     * draft changed underneath it, in which case `setDraft` is the fallback.
+     * The draft is only filled, never submitted.
+     */
+    function fillDraft(inputActions, text) {
+      if (!inputActions) return false
+      try {
+        const span = inputActions.captureInsertion?.()
+        if (span && inputActions.insertText?.(text, span)) return true
+      } catch {
+        /* fall through */
+      }
+      try {
+        inputActions.setDraft?.(text)
+        return true
+      } catch {
+        return false
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Asking the guide from a click.
+    //
+    // The panel slot does NOT receive `inputActions` (only composer slots do),
+    // so a click in the map cannot reach the draft by props alone. The two
+    // surfaces are bridged by a small bus (src/client/bus.js): the map
+    // publishes a question, and the composer-side helper puts it in the draft.
+    //
+    // The draft is filled, never submitted. The player sees the question and
+    // sends it themselves, which keeps every answer under their control and
+    // avoids spending a turn on a click they did not mean to make.
+    // ------------------------------------------------------------------
+
+    const ASKS = {
+      next: '我现在该去哪儿？',
+      missing: '我全收集的话还缺什么？按能补的数量排一下。',
+      build: '按我现在的属性和装备，怎么调整比较好？',
+      level: '我接下来该往哪个方向加点？',
+      souls: '我包里还有哪些 Boss 灵魂没换？分别能换什么？',
+      gems: '我还缺哪些质变宝石？分别在哪里拿？',
+      covenant: '我要拿全教团奖励，每个还要交多少个、去哪里刷？',
+      bonfire: '我还有几个篝火没点，分别怎么去？',
+    }
+
+    function askAboutItem(name, kind) {
+      const what = kind === 'ring' ? '戒指' : kind === 'spell' ? '法术' : '物品'
+      return `「${name}」这个${what}在哪里拿？如果存档看不出位置，请给出处链接。`
+    }
+
+    function askAboutArea(area, missing) {
+      const list = missing
+        .map((l) => l.split(' - ').slice(1).join(' - '))
+        .filter(Boolean)
+        .join('、')
+      return `${area} 还剩 ${missing.length} 个篝火没点（${list}），具体怎么走？`
+    }
+
+    /**
+     * A button that drops a question into the composer draft.
+     *
+     * It reports what happened rather than assuming success: if nothing is
+     * listening the button says so, instead of appearing to work and doing
+     * nothing.
+     */
+    function AskButton({ text, label, compact }) {
+      const [state, setState] = useState('idle')
+      const click = () => {
+        if (state === 'busy') return
+        setState('busy')
+        const delivered = publishAsk(text)
+        setState(delivered ? 'sent' : 'error')
+        if (delivered) setTimeout(() => setState('idle'), 1500)
+        else setTimeout(() => setState('idle'), 2600)
+      }
+      const tone =
+        state === 'sent' ? C.done : state === 'error' ? C.warn : state === 'busy' ? C.sub : C.text
+      return h(
+        'button',
+        {
+          onClick: click,
+          disabled: state === 'busy',
+          title: text,
+          style: {
+            fontSize: compact ? 10 : 11,
+            lineHeight: 1.4,
+            padding: compact ? '1px 6px' : '2px 8px',
+            borderRadius: 999,
+            cursor: state === 'busy' ? 'wait' : 'pointer',
+            border: `1px solid ${state === 'error' ? C.warn : C.border}`,
+            background: 'transparent',
+            color: tone,
+            whiteSpace: 'nowrap',
+          },
+        },
+        state === 'sent' ? '已填入' : state === 'busy' ? '…' : state === 'error' ? '无处可放' : label,
+      )
+    }
+
     // Area keys must match the labels the Host emits from bonfires.json. That
     // table folds Filianore's Rest into 环印城 and has no 初始之火 area, so those
     // two are not drawn as separate nodes.
@@ -118,6 +266,9 @@ window.__ModuleLoader__.load({
 
     function MapCanvas({ d }) {
       const [hover, setHover] = useState(null)
+      // Per-node click feedback. Held here rather than inside the map callback
+      // because hooks cannot be declared inside a loop or a map callback.
+      const [nodeStatus, setNodeStatus] = useState({})
       const cur = d.character.area
 
       const lines = EDGES.map(([a, b], i) => {
@@ -143,13 +294,30 @@ window.__ModuleLoader__.load({
         const full = has && a.lit === a.total
         const isCur = cur === name
         const on = hover === name
+        // A node with bonfires still unlit is actionable: clicking asks how to
+        // reach them. Nodes that are done or have no data stay inert so the map
+        // does not offer clicks that lead nowhere.
+        const missing = (d.missingByArea || {})[name] || []
+        const clickable = missing.length > 0
+        const status = nodeStatus[name] || 'idle'
+        const onClick = () => {
+          if (!clickable || status === 'busy') return
+          setNodeStatus((s) => ({ ...s, [name]: 'busy' }))
+          const delivered = publishAsk(askAboutArea(name, missing))
+          setNodeStatus((s) => ({ ...s, [name]: delivered ? 'sent' : 'error' }))
+          setTimeout(
+            () => setNodeStatus((s) => ({ ...s, [name]: 'idle' })),
+            delivered ? 1500 : 2600,
+          )
+        }
         return h(
           'g',
           {
             key: name,
             onMouseEnter: () => setHover(name),
             onMouseLeave: () => setHover(null),
-            style: { cursor: 'default' },
+            onClick,
+            style: { cursor: clickable ? 'pointer' : 'default' },
           },
           h('rect', {
             x: b.x, y: b.y, width: CELL_W, height: CELL_H, rx: 7,
@@ -175,6 +343,16 @@ window.__ModuleLoader__.load({
           isCur
             ? h('circle', { cx: b.x + CELL_W - 10, cy: b.y + 11, r: 4, fill: C.curr })
             : null,
+          // Click feedback drawn on the node itself, so the player sees which
+          // area the question was about.
+          status !== 'idle'
+            ? h('circle', {
+                cx: b.x + CELL_W - 10,
+                cy: b.y + CELL_H - 11,
+                r: 4,
+                fill: status === 'sent' ? C.done : status === 'error' ? C.warn : C.sub,
+              })
+            : null,
         )
       })
 
@@ -190,7 +368,10 @@ window.__ModuleLoader__.load({
               },
             },
             `${hover}：${d.areas[hover].lit}/${d.areas[hover].total} 篝火` +
-              (d.areas[hover].lit === d.areas[hover].total ? '，已满' : `，还差 ${d.areas[hover].total - d.areas[hover].lit}`),
+              (d.areas[hover].lit === d.areas[hover].total
+                ? '，已满'
+                : `，还差 ${d.areas[hover].total - d.areas[hover].lit}`) +
+              ((d.missingByArea || {})[hover]?.length ? '　点击提问怎么走' : ''),
           )
         : null
 
@@ -293,6 +474,28 @@ window.__ModuleLoader__.load({
       note: { label: '说明', color: C.sub },
     }
 
+    /** A row of one-click questions, for the things players ask most. */
+    function QuickAsks() {
+      const items = [
+        { label: '下一步干嘛', ask: ASKS.next },
+        { label: '还缺什么', ask: ASKS.missing },
+        { label: '配装建议', ask: ASKS.build },
+        { label: '加点', ask: ASKS.level },
+        { label: '灵魂怎么用', ask: ASKS.souls },
+        { label: '缺哪些宝石', ask: ASKS.gems },
+        { label: '教团还差多少', ask: ASKS.covenant },
+      ]
+      return h(
+        'div',
+        {
+          style: {
+            display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14,
+          },
+        },
+        items.map((it) => h(AskButton, { key: it.label, text: it.ask, label: it.label })),
+      )
+    }
+
     /** "What to do next", ordered by how soon it can be acted on. */
     function NextSteps({ d }) {
       const steps = nextSteps(d)
@@ -322,6 +525,9 @@ window.__ModuleLoader__.load({
                     'div',
                     { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
                     h('span', { style: { fontSize: 12, color: C.text, flex: 1 } }, s.title),
+                    s.ask
+                      ? h(AskButton, { text: s.ask, label: '问 AI', compact: true })
+                      : null,
                     h('span', { style: { fontSize: 10, color: rank.color, whiteSpace: 'nowrap' } }, rank.label),
                   ),
                   h('div', { style: { fontSize: 11, color: C.sub, marginTop: 2 } }, s.detail),
@@ -347,6 +553,9 @@ window.__ModuleLoader__.load({
     function AchievementList({ d }) {
       const ach = d.achievements
       if (!ach?.entries) return null
+      // Which achievement is currently being asked about, so the missing-item
+      // list can expand under it instead of opening somewhere else.
+      const [openId, setOpenId] = useState(null)
       return h(
         'div',
         { style: { marginTop: 16 } },
@@ -359,19 +568,67 @@ window.__ModuleLoader__.load({
             .map((e) =>
               h(
                 'div',
-                { key: e.id, style: { display: 'flex', alignItems: 'center', gap: 8 } },
+                { key: e.id, style: { display: 'flex', flexDirection: 'column', gap: 4 } },
                 h(
-                  'span',
-                  { style: { width: 14, fontSize: 11, color: e.have >= e.total ? C.done : C.sub } },
-                  e.have >= e.total ? '✔' : '·',
+                  'div',
+                  { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+                  h(
+                    'span',
+                    { style: { width: 14, fontSize: 11, color: e.have >= e.total ? C.done : C.sub } },
+                    e.have >= e.total ? '✔' : '·',
+                  ),
+                  h('span', { style: { fontSize: 11, color: C.text, flex: 1 } }, e.name),
+                  e.missing && e.missing.length
+                    ? h(
+                        'button',
+                        {
+                          onClick: () => setOpenId(openId === e.id ? null : e.id),
+                          title: `还差 ${e.missing.length} 项，点开逐个问`,
+                          style: {
+                            fontSize: 10, padding: '1px 6px', borderRadius: 999,
+                            cursor: 'pointer', border: `1px solid ${C.border}`,
+                            background: 'transparent', color: C.sub, whiteSpace: 'nowrap',
+                          },
+                        },
+                        openId === e.id ? '收起' : `缺 ${e.missing.length}`,
+                      )
+                    : null,
+                  h('span', {
+                    style: {
+                      fontSize: 11, color: e.have >= e.total ? C.done : C.sub,
+                      fontVariantNumeric: 'tabular-nums',
+                    },
+                  }, `${e.have}/${e.total}`),
                 ),
-                h('span', { style: { fontSize: 11, color: C.text, flex: 1 } }, e.name),
-                h('span', {
-                  style: {
-                    fontSize: 11, color: e.have >= e.total ? C.done : C.sub,
-                    fontVariantNumeric: 'tabular-nums',
-                  },
-                }, `${e.have}/${e.total}`),
+                openId === e.id && e.missing && e.missing.length
+                  ? h(
+                      'div',
+                      {
+                        style: {
+                          display: 'flex', flexWrap: 'wrap', gap: 4,
+                          paddingLeft: 22, marginTop: 1,
+                        },
+                      },
+                      e.missing.slice(0, 24).map((name) =>
+                        h(AskButton, {
+                          key: name,
+                          text: askAboutItem(
+                            name,
+                            e.group === 'ring' ? 'ring' : e.group === 'spell' ? 'spell' : 'item',
+                          ),
+                          label: name,
+                          compact: true,
+                        }),
+                      ),
+                      e.missing.length > 24
+                        ? h(
+                            'span',
+                            { style: { fontSize: 10, color: C.sub, alignSelf: 'center' } },
+                            `…另有 ${e.missing.length - 24} 个`,
+                          )
+                        : null,
+                    )
+                  : null,
               ),
             ),
           ach.entries
@@ -408,6 +665,29 @@ window.__ModuleLoader__.load({
       { label: '配装建议', ask: '按我现在的属性和装备，怎么调整比较好？' },
       { label: '加点', ask: '我接下来该往哪个方向加点？' },
     ]
+
+    /**
+     * The listener that actually fills the draft.
+     *
+     * It is a separate component on purpose: the pill itself returns null when
+     * the save cannot be read, and a component that returns null unmounts its
+     * effects — which would silently drop every question published while the
+     * game was mid-save. This component never returns null, so the
+     * subscription survives.
+     */
+    function DraftListener({ inputActions }) {
+      useEffect(() => {
+        const off = onAsk((ask) => {
+          if (!ask?.text) return
+          fillDraft(inputActions, ask.text)
+        })
+        // A question published before this mounted is still worth taking.
+        const pending = takeAsk()
+        if (pending?.text) fillDraft(inputActions, pending.text)
+        return off
+      }, [inputActions])
+      return null
+    }
 
     function Pill({ inputActions }) {
       const st = useProgress(60000)
@@ -571,6 +851,7 @@ window.__ModuleLoader__.load({
           detail: '已击败，灵魂仍在包里 —— 去任意的灵魂交换处就能各换一件。',
           items: r.souls.slice(0, 8).map((s) => s.soul),
           more: Math.max(0, r.souls.length - 8),
+          ask: ASKS.souls,
         })
       }
 
@@ -583,6 +864,7 @@ window.__ModuleLoader__.load({
           rank: 'now',
           title: `${area}：${real.length} 个篝火未点`,
           detail: real.map((l) => l.split(' - ').slice(1).join(' - ')).join('、'),
+          ask: askAboutArea(area, real),
         })
       }
       if (byArea['无火祭祀场']?.some((l) => /First Flame/i.test(l))) {
@@ -601,6 +883,7 @@ window.__ModuleLoader__.load({
             rank: 'grind',
             title: `${c.covenant}：还差 ${c.toRank1} 个 ${c.token}`,
             detail: `当前 ${c.held}/${c.rank1}，交满可换该教团奖励。`,
+            ask: ASKS.covenant,
           })
         }
       }
@@ -609,6 +892,7 @@ window.__ModuleLoader__.load({
           rank: 'grind',
           title: `${r.gaps.covenantGaps.length} 个法术锁在教团等级里`,
           detail: r.gaps.covenantGaps.map((g) => g.name).join('、'),
+          ask: ASKS.covenant,
         })
       }
 
@@ -621,6 +905,7 @@ window.__ModuleLoader__.load({
           rank: 'later',
           title: `本轮可补 ${r.gaps.now.length} 项`,
           detail: `戒指 ${rings}、法术 ${spells}。具体哪一件可以问我。`,
+          ask: ASKS.missing,
         })
       }
 
@@ -684,6 +969,7 @@ window.__ModuleLoader__.load({
           },
         },
         head,
+        h(QuickAsks, {}),
         axes,
         h(MapCanvas, { d }),
         legend,
@@ -752,6 +1038,7 @@ window.__ModuleLoader__.load({
         // Same blocks as the main panel. The first version stopped at the map,
         // so the tab looked finished while the two most actionable sections were
         // missing.
+        h(QuickAsks, {}),
         h(NextSteps, { d }),
         h(AchievementList, { d }),
       )
@@ -784,7 +1071,15 @@ window.__ModuleLoader__.load({
         ctx.slots.inject('conversation.input.left', () =>
           ctx.slots.register(
             { name: 'conversation.input.left', id: NS, order: 20 },
-            (props) => h(Pill, { inputActions: props.inputActions }),
+            (props) =>
+              h(
+                React.Fragment,
+                null,
+                // The listener has to exist even when the pill hides itself, so
+                // it is registered as a sibling rather than inside the pill.
+                h(DraftListener, { inputActions: props.inputActions }),
+                h(Pill, { inputActions: props.inputActions }),
+              ),
           ),
         )
 
