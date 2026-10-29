@@ -1,0 +1,35 @@
+MIT License
+
+Copyright (c) 2026 plankton12138
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Note on game data
+
+The MIT licence above covers this project's own source code. It does not grant
+any rights to Dark Souls III, its trademarks, or its assets, which remain the
+property of FromSoftware and Bandai Namco.
+
+`data/reference/ds3/items.json` reproduces factual game data (item IDs and their
+in-game display names), derived from the mozartdiniz/ds3-advisor data files. The
+upstream project declares no licence; only numeric IDs and display names are
+reproduced here, not source code. No game binary, text archive, or asset is
+included in this repository.

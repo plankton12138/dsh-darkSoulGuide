@@ -1,0 +1,62 @@
+{
+  "_note": "区域连通图（草稿）。edges 视为双向可通行；requires 只是到达条件提示，不参与寻路计算。confidence=medium 的边尚未逐条核对，回答时应带上不确定说明。",
+  "_areas_note": "区域名必须与 bonfires.json 标签中 ' - ' 前的部分一致，否则 route 结果无法与篝火数据对齐。",
+  "start": "传火祭祀场",
+  "edges": [
+    { "from": "灰烬墓地", "to": "传火祭祀场", "note": "开场教学后传送", "confidence": "high" },
+    { "from": "传火祭祀场", "to": "洛斯里克高墙", "note": "主入口", "confidence": "high" },
+    { "from": "洛斯里克高墙", "to": "不死聚落", "note": "高墙尽头", "confidence": "high" },
+    { "from": "不死聚落", "to": "牺牲之路", "note": "聚落尽头", "confidence": "high" },
+    { "from": "牺牲之路", "to": "法兰要塞", "note": "沼泽区域", "confidence": "high" },
+    { "from": "牺牲之路", "to": "深邃教堂", "note": "十字路分岔", "confidence": "high" },
+    { "from": "法兰要塞", "to": "卡萨斯地下墓地", "note": "深渊监视者之后", "confidence": "high" },
+    { "from": "卡萨斯地下墓地", "to": "烟熏湖", "note": "墓地中的塌陷通道", "confidence": "high" },
+    {
+      "from": "卡萨斯地下墓地",
+      "to": "伊鲁席尔",
+      "note": "通往冷冽谷",
+      "requires": "小人偶（深邃主教群掉落），否则过不了桥",
+      "confidence": "high"
+    },
+    { "from": "伊鲁席尔", "to": "伊鲁席尔地下监狱", "note": "教宗之后的岔路", "confidence": "high" },
+    { "from": "伊鲁席尔地下监狱", "to": "罪业之都", "note": "监狱下层", "confidence": "high" },
+    {
+      "from": "伊鲁席尔地下监狱",
+      "to": "古龙顶端",
+      "note": "需在祭坛处使用古龙姿势",
+      "requires": "古龙姿势",
+      "confidence": "high"
+    },
+    {
+      "from": "伊鲁席尔",
+      "to": "洛斯里克城",
+      "note": "击败三位薪王后被传送",
+      "requires": "已击败三位薪王",
+      "confidence": "medium"
+    },
+    { "from": "洛斯里克城", "to": "大书库", "note": "城内存档点", "confidence": "high" },
+    {
+      "from": "大书库",
+      "to": "无火祭祀场",
+      "note": "双子王子之后",
+      "requires": "击败双子王子",
+      "confidence": "high"
+    },
+    {
+      "from": "深邃教堂",
+      "to": "艾雷德尔绘画世界",
+      "note": "DLC1 入口，清拭圣堂的画作",
+      "requires": "触碰画作",
+      "confidence": "high"
+    },
+    {
+      "from": "无火祭祀场",
+      "to": "聚集地",
+      "note": "DLC2 入口",
+      "requires": "抵达初始之火附近",
+      "confidence": "medium"
+    },
+    { "from": "聚集地", "to": "环印城", "note": "DLC2 主线", "confidence": "high" },
+    { "from": "环印城", "to": "菲莲诺尔寝室", "note": "DLC2 深处", "confidence": "high" }
+  ]
+}

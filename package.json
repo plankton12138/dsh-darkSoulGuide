@@ -1,0 +1,36 @@
+{
+  "name": "dsh-darksouls-guide",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Dark Souls III 存档感知攻略助手：读存档、答攻略、规划路线，附区域进度图",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "src/**/*.js",
+    "tools/**",
+    "data/reference/**"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ]
+    }
+  }
+}

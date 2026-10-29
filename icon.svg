@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Dark Souls Guide">
+  <circle cx="32" cy="32" r="31" fill="#14110f"/>
+  <circle cx="32" cy="32" r="23" fill="none" stroke="#d97f36" stroke-width="2.5" opacity="0.9"/>
+  <circle cx="32" cy="32" r="17" fill="none" stroke="#8c5a2b" stroke-width="1" opacity="0.6"/>
+  <path d="M32 16c5.5 6.5 8.5 10 8.5 15a8.5 8.5 0 0 1-17 0c0-3.2 1.9-5.4 4.2-7.6.6 3 1.8 4.4 3.8 5.5-.2-4.3-.6-8.3.5-12.9z" fill="#f2a95c"/>
+</svg>

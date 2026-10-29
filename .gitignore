@@ -1,0 +1,31 @@
+node_modules/
+scratch/
+__pycache__/
+*.pyc
+*.log
+
+# --- Personal save data: never commit, never publish -----------------------
+# A DS3 save carries the player's Steam account id, character names and full
+# play history. These are real saves, not fixtures we generate, so the patterns
+# are deliberately broad instead of listing individual directories: the old
+# rule only covered `tests/fixtures/saves/` and left four 9 MB saves in
+# `tests/fixtures/ds3/` untracked-but-committable.
+*.sl2
+*.sl2.bak
+**/DRAKS0005*/**
+**/DarkSoulsIII/**
+
+# Test fixtures must be generated, not copied: a save carries the account id,# character names and play history of whoever played it.
+
+# --- Third-party reference code --------------------------------------------
+# `ref/` holds other projects' source kept locally for reading the save format.
+# It carries no licence permitting redistribution, so it stays out of the
+# repository. The format facts we rely on (offsets, ID encoding) are written up
+# in docs/blueprint.md instead.
+ref/
+
+# DSR-era leftovers kept locally only: no provenance, not referenced by any code.
+archive/
+
+# Steam account id leaked in cloud-sync metadata; never publish.
+*.vdf
