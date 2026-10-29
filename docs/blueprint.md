@@ -259,7 +259,7 @@ darksoulGuide/
 │  └─ parsers/ds3/run.js     子进程封装、错误分类、缓存
 ├─ tools/
 │  ├─ ds3/dump_save.py       ← 解析器（可独立跑）
-│  └─ dsr/dump_save.py       DSR 旧版，留作参考
+│  └─ (DSR 旧版解析器已移出仓库，见 gitignore)
 ├─ data/reference/ds3/
 │  ├─ items.json             2419 武器 + 361 防具 + 124 戒指 + 325 消耗品
 │  ├─ bonfires.json          81 篝火旗标（含 3 条 _pseudo）
@@ -417,6 +417,22 @@ darksoulGuide/
 
 ---
 
+## 11.5 开源发布边界
+
+仓库公开发布，但有四类内容**永远不进版本库**：
+
+| 内容 | 原因 |
+|---|---|
+| `*.sl2` 存档 | 含 Steam 账号 ID、角色名、完整游玩记录 |
+| `*.vdf` | Steam 云同步元数据，里面就是 account id |
+| `ref/` | 第三方源码，**无授权文件**，不可再分发 |
+| `archive/` | DSR 时代遗留：无来源数据、失去依赖的旧解析器 |
+
+`.gitignore` 用通配而不是逐个目录列，因为最初只写了 `tests/fixtures/saves/`，结果 `tests/fixtures/ds3/` 下 4 个 9MB 存档一个都没被排除。
+
+`items.json` 的来源在 `_source` 里如实写明：上游 `ds3-advisor` **声明无授权**，本仓库只复现事实性游戏数据（数字 ID 与游戏内显示名），不含任何源码、游戏二进制或资源文件。LICENSE 里也单列了这一点。
+
+---
 ## 12. 下一步优先级
 
 1. **NPC 任务线校准**（价值最高，需用户配合做存档对比）

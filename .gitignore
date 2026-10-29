@@ -29,3 +29,6 @@ archive/
 
 # Steam account id leaked in cloud-sync metadata; never publish.
 *.vdf
+
+# tools/dsr/ moved to archive/: DSR support is legacy, and its data file had
+# no provenance. The DS3 parser is the supported one.
