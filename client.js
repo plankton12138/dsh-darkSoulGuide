@@ -236,6 +236,122 @@ window.__ModuleLoader__.load({
     }
 
     // ---------------------------------------------------------------------
+    // Shared blocks.
+    //
+    // These live above both surfaces because the main panel and the right-pane
+    // tab must show the same thing — the first version inlined them in the page
+    // only, so the right tab silently lacked "next step" and "achievements"
+    // while looking complete. One component per block prevents that drift.
+    // ---------------------------------------------------------------------
+
+    const RANK_STYLE = {
+      now: { label: '现在就能做', color: C.curr },
+      grind: { label: '需要刷', color: C.warn },
+      later: { label: '可以慢慢来', color: C.sub },
+      note: { label: '说明', color: C.sub },
+    }
+
+    /** "What to do next", ordered by how soon it can be acted on. */
+    function NextSteps({ d }) {
+      const steps = nextSteps(d)
+      return h(
+        'div',
+        { style: { marginTop: 14 } },
+        h('div', { style: { fontSize: 12, color: C.text, marginBottom: 6, fontWeight: 600 } }, '下一步'),
+        h(
+          'div',
+          { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
+          steps.length === 0
+            ? h('div', { style: { fontSize: 12, color: C.done } }, '所有轴都已满，可以进 NG+ 了。')
+            : steps.map((s, i) => {
+                const rank = RANK_STYLE[s.rank] || RANK_STYLE.later
+                return h(
+                  'div',
+                  {
+                    key: i,
+                    style: {
+                      border: `1px solid ${C.border}`, borderRadius: 6,
+                      padding: '6px 10px',
+                      opacity: s.rank === 'note' ? 0.7 : 1,
+                      borderLeft: `3px solid ${rank.color}`,
+                    },
+                  },
+                  h(
+                    'div',
+                    { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
+                    h('span', { style: { fontSize: 12, color: C.text, flex: 1 } }, s.title),
+                    h('span', { style: { fontSize: 10, color: rank.color, whiteSpace: 'nowrap' } }, rank.label),
+                  ),
+                  h('div', { style: { fontSize: 11, color: C.sub, marginTop: 2 } }, s.detail),
+                  (s.items || []).length
+                    ? h(
+                        'div',
+                        { style: { fontSize: 10, color: C.sub, marginTop: 3, lineHeight: 1.6 } },
+                        s.items.join('、') + (s.more ? ` 等 ${s.items.length + s.more} 个` : ''),
+                      )
+                    : null,
+                )
+              }),
+        ),
+      )
+    }
+
+    /**
+     * Achievements: bars for verifiable entries, a stated reason for the rest.
+     *
+     * A fake progress bar is worse than an honest "cannot be read from the
+     * save", so unverifiable entries never get a percentage.
+     */
+    function AchievementList({ d }) {
+      const ach = d.achievements
+      if (!ach?.entries) return null
+      return h(
+        'div',
+        { style: { marginTop: 16 } },
+        h('div', { style: { fontSize: 12, color: C.text, marginBottom: 6, fontWeight: 600 } }, '成就'),
+        h(
+          'div',
+          { style: { display: 'flex', flexDirection: 'column', gap: 5 } },
+          ach.entries
+            .filter((e) => e.verifiable)
+            .map((e) =>
+              h(
+                'div',
+                { key: e.id, style: { display: 'flex', alignItems: 'center', gap: 8 } },
+                h(
+                  'span',
+                  { style: { width: 14, fontSize: 11, color: e.have >= e.total ? C.done : C.sub } },
+                  e.have >= e.total ? '✔' : '·',
+                ),
+                h('span', { style: { fontSize: 11, color: C.text, flex: 1 } }, e.name),
+                h('span', {
+                  style: {
+                    fontSize: 11, color: e.have >= e.total ? C.done : C.sub,
+                    fontVariantNumeric: 'tabular-nums',
+                  },
+                }, `${e.have}/${e.total}`),
+              ),
+            ),
+          ach.entries
+            .filter((e) => !e.verifiable)
+            .map((e) =>
+              h(
+                'div',
+                {
+                  key: e.id,
+                  title: e.reason,
+                  style: { display: 'flex', gap: 8, fontSize: 10, color: C.sub, opacity: 0.65 },
+                },
+                h('span', { style: { width: 14 } }, '—'),
+                h('span', { style: { flex: 1 } }, e.name),
+                h('span', null, '存档读不出'),
+              ),
+            ),
+        ),
+      )
+    }
+
+    // ---------------------------------------------------------------------
     // Composer pill: a single compact control in the composer tool row.
     //
     // This used to be a full-width strip below the composer, which cost a
@@ -502,54 +618,6 @@ window.__ModuleLoader__.load({
         (d.summary || []).map((row) => h(Axis, { key: row.key, row })),
       )
 
-      const steps = nextSteps(d)
-      const RANK = {
-        now: { label: '现在就能做', color: C.curr },
-        grind: { label: '需要刷', color: C.warn },
-        later: { label: '可以慢慢来', color: C.sub },
-        note: { label: '说明', color: C.sub },
-      }
-      const next = h(
-        'div',
-        { style: { marginTop: 14 } },
-        h('div', { style: { fontSize: 12, color: C.text, marginBottom: 6, fontWeight: 600 } }, '下一步'),
-        h(
-          'div',
-          { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
-          steps.length === 0
-            ? h('div', { style: { fontSize: 12, color: C.done } }, '所有轴都已满，可以进 NG+ 了。')
-            : steps.map((s, i) => {
-                const rank = RANK[s.rank] || RANK.later
-                return h(
-                  'div',
-                  {
-                    key: i,
-                    style: {
-                      border: `1px solid ${C.border}`, borderRadius: 6,
-                      padding: '6px 10px',
-                      opacity: s.rank === 'note' ? 0.7 : 1,
-                      borderLeft: `3px solid ${rank.color}`,
-                    },
-                  },
-                  h(
-                    'div',
-                    { style: { display: 'flex', gap: 8, alignItems: 'baseline' } },
-                    h('span', { style: { fontSize: 12, color: C.text, flex: 1 } }, s.title),
-                    h('span', { style: { fontSize: 10, color: rank.color, whiteSpace: 'nowrap' } }, rank.label),
-                  ),
-                  h('div', { style: { fontSize: 11, color: C.sub, marginTop: 2 } }, s.detail),
-                  (s.items || []).length
-                    ? h(
-                        'div',
-                        { style: { fontSize: 10, color: C.sub, marginTop: 3, lineHeight: 1.6 } },
-                        s.items.join('、') + (s.more ? ` 等 ${s.items.length + s.more} 个` : ''),
-                      )
-                    : null,
-                )
-              }),
-        ),
-      )
-
       const legend = h(
         'div',
         { style: { display: 'flex', gap: 14, fontSize: 11, color: C.sub, marginTop: 10, flexWrap: 'wrap' } },
@@ -563,57 +631,6 @@ window.__ModuleLoader__.load({
         { style: { fontSize: 11, color: C.sub, marginTop: 12, lineHeight: 1.7 } },
         '想要具体建议就去对话里问 —— 输入框上方的药丸有快捷提问。',
       )
-
-      // Achievements. Only the verifiable ones get a bar; the rest are listed
-      // by name with a reason, because a fake progress bar is worse than an
-      // honest "cannot be read from the save".
-      const ach = d.achievements
-      const achBox = ach?.entries
-        ? h(
-            'div',
-            { style: { marginTop: 16 } },
-            h('div', { style: { fontSize: 12, color: C.text, marginBottom: 6, fontWeight: 600 } }, '成就'),
-            h(
-              'div',
-              { style: { display: 'flex', flexDirection: 'column', gap: 5 } },
-              ach.entries
-                .filter((e) => e.verifiable)
-                .map((e) =>
-                  h(
-                    'div',
-                    { key: e.id, style: { display: 'flex', alignItems: 'center', gap: 8 } },
-                    h(
-                      'span',
-                      { style: { width: 14, fontSize: 11, color: e.have >= e.total ? C.done : C.sub } },
-                      e.have >= e.total ? '✔' : '·',
-                    ),
-                    h('span', { style: { fontSize: 11, color: C.text, flex: 1 } }, e.name),
-                    h('span', {
-                      style: {
-                        fontSize: 11, color: e.have >= e.total ? C.done : C.sub,
-                        fontVariantNumeric: 'tabular-nums',
-                      },
-                    }, `${e.have}/${e.total}`),
-                  ),
-                ),
-              ach.entries
-                .filter((e) => !e.verifiable)
-                .map((e) =>
-                  h(
-                    'div',
-                    {
-                      key: e.id,
-                      title: e.reason,
-                      style: { display: 'flex', gap: 8, fontSize: 10, color: C.sub, opacity: 0.65 },
-                    },
-                    h('span', { style: { width: 14 } }, '—'),
-                    h('span', { style: { flex: 1 } }, e.name),
-                    h('span', null, '存档读不出'),
-                  ),
-                ),
-            ),
-          )
-        : null
 
       return h(
         'div',
@@ -630,8 +647,8 @@ window.__ModuleLoader__.load({
         axes,
         h(MapCanvas, { d }),
         legend,
-        next,
-        achBox,
+        h(NextSteps, { d }),
+        h(AchievementList, { d }),
         hint,
       )
     }
@@ -698,6 +715,11 @@ window.__ModuleLoader__.load({
         left.length
           ? h('div', { style: { fontSize: 11, color: C.warn, marginTop: 10 } }, `还有 ${left.length} 项未满`)
           : h('div', { style: { fontSize: 11, color: C.done, marginTop: 10 } }, '全部收集完成'),
+        // Same blocks as the main panel. The first version stopped at the map,
+        // so the tab looked finished while the two most actionable sections were
+        // missing.
+        h(NextSteps, { d }),
+        h(AchievementList, { d }),
       )
     }
 
