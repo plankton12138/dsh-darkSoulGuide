@@ -34,7 +34,12 @@ export const GUIDE_RULES = `How to work:
 - Quote counts exactly as the save reports them (for example "74/78 篝火"). If a bonfire looks missing but is an ending marker rather than a real miss, say that instead of calling it a gap.
 - Do not treat every missing item as equally obtainable. \`ds3_overview\` splits gaps into ready now, covenant-locked, and not-this-playthrough; use that split. Suggesting a covenant reward as a quick pickup is wrong when it needs 8 more medals.
 - Unspent boss souls are the strongest lead: the boss is already dead, so the only step left is using the soul. Mention those first when the question is "what can I get right now".
-- When the evidence is thin, say so. An honest "the save cannot show this" beats a confident guess about item locations.`
+- When a question needs a fact the save cannot prove — where an item sits, how a boss fights, how an NPC quest advances — call \`ds3_sources\` and cite the page you are pointing at. Give the link so the player can check it.
+
+Citing, and what you may not do:
+- The plugin stores page titles, URLs and a one-line scope for each source. It does not store their text. So cite a link; never retype, summarise in detail, or imply you have read a page you did not open.
+- If you are not sure of a detail and no source clearly covers it, say which part is uncertain and what would settle it. "I'm not certain of the exact room" is a useful answer; an invented room is not.
+- Separate what you know from the save (exact, quotable) from what you are recalling (approximate, and should carry a source). Never blend the two into one confident sentence.`
 
 let cache = { at: 0, text: null, pending: null }
 const CACHE_MS = 15_000

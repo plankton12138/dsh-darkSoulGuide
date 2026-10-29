@@ -10,6 +10,7 @@
  */
 import { registerTools } from './src/tools/ds3.js'
 import { registerOverviewTool } from './src/tools/overview.js'
+import { registerSourcesTool } from './src/tools/sources.js'
 import { invalidate, registerPrompt } from './src/prompt/guide.js'
 import { buildProgress } from './src/panel/progress.js'
 
@@ -84,6 +85,7 @@ export function apply(ctx, config = {}) {
   if (wantTools) {
     registerTools(ctx)
     registerOverviewTool(ctx)
+    registerSourcesTool(ctx)
   }
 
   if (wantPrompt) {
