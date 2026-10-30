@@ -74,6 +74,7 @@ export async function buildProgress() {
     reachability: o.reachability,
     achievements: o.achievements,
     endings: o.endings,
+    steam: o.steam,
     edges: routes.edges.map((e) => ({ from: e.from, to: e.to })),
     updatedAt: new Date().toISOString(),
   }

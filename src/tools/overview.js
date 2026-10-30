@@ -158,6 +158,11 @@ const OVERVIEW_OUTPUT = {
         },
       },
     },
+    steam: {
+      type: 'object',
+      description: 'Steam achievement state read from the local Steam client cache. Authoritative for what the account has unlocked, and it survives across playthroughs.',
+      additionalProperties: true,
+    },
     achievements: {
       type: 'object',
       description: 'Achievement status. Only entries the save can prove carry have/total; the rest say why they cannot be verified.',
@@ -303,6 +308,7 @@ export function registerOverviewTool(ctx) {
           },
           covenantStanding: o.reachability.covenants,
           achievements: o.achievements,
+          steam: o.steam,
           endings: o.endings,
         }
       },

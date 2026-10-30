@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { readSection } from '../parsers/ds3/run.js'
 import { buildAxes, summarize } from './progress.js'
 import { endingStatus } from './endings.js'
+import { readSteamAchievements } from './steam.js'
 import { achievementStatus } from './achievements.js'
 import {
   classifyGaps,
@@ -118,9 +119,15 @@ export async function overview(saveId) {
   for (const [fid, info] of Object.entries(endings?.data?.flags ?? {})) {
     endingFlags[fid] = info.value
   }
+  // Steam achievements: the only authoritative record of what the account has
+  // unlocked. The save holds nothing about them, and the game files hide the
+  // names behind an encrypted index.
+  const steam = readSteamAchievements()
+
   const ending = await endingStatus({
     flags: endingFlags,
     killedBosses: bosses.data.killed ?? [],
+    achievements: steam.ok ? steam.achievements : [],
   })
 
   const achievements = achievementStatus({
@@ -128,6 +135,20 @@ export async function overview(saveId) {
     bagNames: allNames,
     rings: items.ring,
     axes,
+    // The achievement list reads `steam.items`; the Steam reader returns
+    // `achievements`. Normalise here so both shapes agree.
+    steam: steam.ok
+      ? {
+          ...steam,
+          items: steam.achievements.map((a) => ({
+            api: a.api,
+            name: a.name,
+            description: a.description,
+            unlocked: a.unlocked,
+            unlockedAt: a.unlockedAt,
+          })),
+        }
+      : null,
     bosses: {
       killed: bosses.data.killedCount,
       total: bosses.data.killedCount + bosses.data.aliveCount,
@@ -164,5 +185,19 @@ export async function overview(saveId) {
     },
     achievements,
     endings: ending,
+    steam: {
+      ok: steam.ok,
+      reason: steam.reason ?? null,
+      persona: steam.persona ?? null,
+      unlocked: steam.unlocked ?? 0,
+      total: steam.total ?? 0,
+      items: (steam.achievements ?? []).map((a) => ({
+        api: a.api,
+        name: a.name,
+        description: a.description,
+        unlocked: a.unlocked,
+        unlockedAt: a.unlockedAt,
+      })),
+    },
   }
 }

@@ -41,10 +41,11 @@ Citing, and what you may not do:
 - If you are not sure of a detail and no source clearly covers it, say which part is uncertain and what would settle it. "I'm not certain of the exact room" is a useful answer; an invented room is not.
 - Separate what you know from the save (exact, quotable) from what you are recalling (approximate, and should carry a source). Never blend the two into one confident sentence.
 
-Endings:
-- The save distinguishes one ending clearly: the First Flame flag tells you whether 传火终结 was taken. Beyond that, it cannot separate 篡火 from 传火终结, and it keeps no list of endings already seen.
-- So never report a count like "you have 2 of 4 endings". Report per ending what the save shows, and say plainly that the others are indistinguishable from the file.
-- When asked how to get an ending, give the condition and the prerequisite items, and note that the save cannot confirm it was taken.`
+Achievements and endings:
+- The Steam achievement list in the live state is authoritative for what the player has unlocked, and it survives across playthroughs. Use it instead of guessing.
+- The save cannot say which endings were reached — it keeps no such record. It only says whether the story has reached the point where an ending can be taken. So: "already reached" comes from Steam, "can reach now" comes from the save.
+- DS3 has three story endings, not four. Mind the naming trap: 传火终结 (The End of Fire) is the Fire Keeper ending where the flame is put out; 初始之火的继承者 (To Link the First Flame) is the default one. The Chinese names read the other way round, so quote the English when it matters.
+- When the player asks how to get a missing achievement, combine the three things you have: what the save says they already own, what the achievement requires, and a source link for where to find it.`
 
 let cache = { at: 0, text: null, pending: null }
 const CACHE_MS = 15_000
@@ -83,6 +84,11 @@ function formatState(o) {
       `结局：已达成 ${done.length ? done.map((e) => e.name).join('、') : '（无法确认）'}` +
         `${avail.length ? `；现在可触发 ${avail.map((e) => e.name).join('、')}` : ''}`,
     )
+  }
+  const st = o.steam
+  if (st?.ok && st.unlocked > 0) {
+    const missing = (st.items || []).filter((a) => !a.unlocked).map((a) => a.name)
+    lines.push(`Steam 成就：${st.unlocked}/${st.total}（${st.persona ?? '本机账号'}）。还缺：${missing.join('、')}`)
   }
   const ach = o.achievements
   if (ach?.entries) {

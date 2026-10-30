@@ -488,10 +488,8 @@ window.__ModuleLoader__.load({
       if (!e?.endings) return null
       const MARK = {
         done: { icon: '✔', color: C.done, label: '已达成' },
-        available: { icon: '○', color: C.curr, label: '现在可拿' },
-        possible: { icon: '?', color: C.warn, label: '存档看不出' },
-        locked: { icon: '·', color: C.sub, label: '未解锁' },
-        ambiguous: { icon: '?', color: C.warn, label: '无法区分' },
+        available: { icon: '○', color: C.curr, label: '现在可触发' },
+        locked: { icon: '·', color: C.sub, label: '还没到' },
       }
       return h(
         'div',
@@ -530,6 +528,66 @@ window.__ModuleLoader__.load({
               )
             : null,
         ),
+      )
+    }
+
+    /**
+     * The Steam achievement list: what is left, each one clickable.
+     *
+     * This is the section that turns "30/43" into something to do. The names
+     * and unlock times come from Steam's own cache, so they are exact — and
+     * they survive across playthroughs, which is why an ending cleared months
+     * ago still shows up here.
+     */
+    function SteamAchievements({ d }) {
+      const st = d.steam
+      if (!st?.ok || !st.items?.length) return null
+      const [open, setOpen] = useState(false)
+      const missing = st.items.filter((a) => !a.unlocked)
+      const pct = st.total ? Math.round((st.unlocked / st.total) * 100) : 0
+      return h(
+        'div',
+        { style: { marginTop: 16 } },
+        h(
+          'div',
+          { style: { display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 } },
+          h('span', { style: { fontSize: 12, color: C.text, fontWeight: 600 } }, 'Steam 成就'),
+          h('span', { style: { fontSize: 11, color: C.sub } }, `${st.unlocked}/${st.total}（${pct}%）`),
+          h('span', { style: { flex: 1 } }),
+          missing.length
+            ? h(
+                'button',
+                {
+                  onClick: () => setOpen((v) => !v),
+                  style: {
+                    fontSize: 10, padding: '1px 7px', borderRadius: 999,
+                    cursor: 'pointer', border: `1px solid ${C.border}`,
+                    background: 'transparent', color: C.warn,
+                  },
+                },
+                open ? '收起' : `看还差哪 ${missing.length} 个`,
+              )
+            : null,
+        ),
+        h(
+          'div',
+          { style: { height: 3, borderRadius: 2, background: 'var(--dsw-alias-bg-layer-3, #333)', overflow: 'hidden' } },
+          h('div', { style: { width: `${pct}%`, height: '100%', background: C.done } }),
+        ),
+        open
+          ? h(
+              'div',
+              { style: { display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 7 } },
+              missing.map((a) =>
+                h(AskButton, {
+                  key: a.api,
+                  text: `「${a.name}」这个成就怎么达成？结合我现在的存档状态说说。`,
+                  label: a.name,
+                  compact: true,
+                }),
+              ),
+            )
+          : null,
       )
     }
 
@@ -612,6 +670,8 @@ window.__ModuleLoader__.load({
     function AchievementList({ d }) {
       const ach = d.achievements
       if (!ach?.entries) return null
+      const steam = ach.entries.find((e) => e.id === 'steam-achievements')
+      const [showSteam, setShowSteam] = useState(false)
       // Which achievement is currently being asked about, so the missing-item
       // list can expand under it instead of opening somewhere else.
       const [openId, setOpenId] = useState(null)
@@ -705,6 +765,40 @@ window.__ModuleLoader__.load({
                 h('span', null, '存档读不出'),
               ),
             ),
+          // The missing Steam achievements, each clickable: this is the part
+          // that turns "30/43" into something the player can act on.
+          steam && steam.missing && steam.missing.length
+            ? h(
+                'div',
+                { style: { marginTop: 4 } },
+                h(
+                  'button',
+                  {
+                    onClick: () => setShowSteam((v) => !v),
+                    style: {
+                      fontSize: 10, padding: '1px 7px', borderRadius: 999,
+                      cursor: 'pointer', border: `1px solid ${C.border}`,
+                      background: 'transparent', color: C.warn,
+                    },
+                  },
+                  showSteam ? '收起未解锁的成就' : `展开 ${steam.missing.length} 个未解锁成就`,
+                ),
+                showSteam
+                  ? h(
+                      'div',
+                      { style: { display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 5 } },
+                      steam.missing.map((name) =>
+                        h(AskButton, {
+                          key: name,
+                          text: `「${name}」这个成就怎么达成？结合我现在的存档状态说说。`,
+                          label: name,
+                          compact: true,
+                        }),
+                      ),
+                    )
+                  : null,
+              )
+            : null,
         ),
       )
     }
@@ -1035,6 +1129,7 @@ window.__ModuleLoader__.load({
         h(MapCanvas, { d }),
         legend,
         h(NextSteps, { d }),
+        h(SteamAchievements, { d }),
         h(EndingList, { d }),
         h(AchievementList, { d }),
         hint,
@@ -1102,6 +1197,7 @@ window.__ModuleLoader__.load({
         // missing.
         h(QuickAsks, {}),
         h(NextSteps, { d }),
+        h(SteamAchievements, { d }),
         h(EndingList, { d }),
         h(AchievementList, { d }),
       )

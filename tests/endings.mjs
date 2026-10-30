@@ -1,69 +1,80 @@
 /**
- * Endings: what the save can and cannot say.
+ * Endings: the achievement decides what was reached, the save decides what is
+ * still open.
  *
- * The important property is not that the counts are right but that no ending
- * is ever reported as done without evidence. Two of the four endings leave no
- * readable mark, so a "done" verdict for them would be a guess.
+ * An earlier version inferred the reached endings from a save flag and was
+ * wrong — it read a flag named after the First Flame as a record of that flame
+ * being lit, while the player had finished a different ending months earlier.
+ * These checks pin the corrected split, and the corrected mapping: 传火终结 is
+ * ACH02 (The End of Fire, the Fire Keeper ending), not ACH01.
  */
 import assert from 'node:assert/strict'
 import { endingStatus } from '../src/state/endings.js'
 
-const FLAME = '14100002'
-const LORDS = '14100800'
-const GAEL = '15110800'
+const LORDS_DEAD = ['薪王们的化身']
 
-// --- the real save: flame not lit, Lords of Cinder dead ---
+const ach = (api, unlocked) => ({ api, name: api, unlocked, unlockedAt: unlocked ? 1786182828 : null })
+
+// --- what was reached comes from the achievements ----------------------------
 {
   const s = await endingStatus({
-    flags: { [FLAME]: 0, [LORDS]: 1, [GAEL]: 1 },
-    killedBosses: ['奴仆骑士盖尔'],
+    achievements: [ach('ACH01', false), ach('ACH02', true), ach('ACH03', false)],
+    killedBosses: LORDS_DEAD,
   })
-
   const byId = Object.fromEntries(s.endings.map((e) => [e.id, e]))
-  assert.equal(byId['lord-of-cinder'].state, 'done', 'Lord of Cinder should be done')
-  assert.equal(byId['link-the-flame'].state, 'available', 'Link the Flame should be available')
-  assert.equal(byId['age-of-darkness'].state, 'possible', 'DLC2 ending is not confirmable')
-  assert.equal(byId['usurpation'].state, 'possible', 'Usurpation is not confirmable')
 
-  // The two indistinguishable endings must never be reported as done.
-  for (const id of ['age-of-darkness', 'usurpation']) {
-    assert.notEqual(byId[id].state, 'done', `${id} must never be reported as done`)
-  }
+  assert.equal(s.total, 3, 'DS3 has three story endings')
+  assert.equal(byId['end-of-fire'].state, 'done', 'ACH02 is 传火终结')
+  assert.equal(byId['link-the-flame'].state, 'available', 'ACH01 is still open')
+  assert.equal(byId['usurpation'].state, 'available', 'ACH03 is still open')
+  assert.equal(s.reached, 1)
+  assert.deepEqual(s.reachedNames, ['传火终结'])
+}
 
-  // Every ending must carry the evidence it was judged on.
+// --- the Chinese name is a trap, pinned here so nobody "fixes" it back -------
+{
+  const s = await endingStatus({
+    achievements: [ach('ACH01', true), ach('ACH02', false), ach('ACH03', false)],
+    killedBosses: LORDS_DEAD,
+  })
+  const byId = Object.fromEntries(s.endings.map((e) => [e.id, e]))
+  assert.equal(byId['link-the-flame'].state, 'done', 'ACH01 is To Link the First Flame')
+  assert.equal(byId['end-of-fire'].state, 'available', '传火终结 is the Fire Keeper ending, not ACH01')
   for (const e of s.endings) {
-    assert.ok(e.evidence && e.evidence.length > 5, `${e.id} has no evidence`)
+    assert.ok(
+      /The End of Fire|To Link the First Flame|The Usurpation/i.test(e.alias),
+      `${e.id} should carry its English alias to disambiguate`,
+    )
+  }
+}
+
+// --- the save decides reachability ------------------------------------------
+{
+  const s = await endingStatus({ achievements: [], killedBosses: [] })
+  for (const e of s.endings) {
+    assert.equal(e.state, 'locked', `${e.id} should be locked before the final boss`)
+  }
+}
+
+// --- no Steam data means no claim of having reached anything ----------------
+{
+  const s = await endingStatus({ achievements: [], killedBosses: LORDS_DEAD })
+  for (const e of s.endings) {
+    assert.notEqual(e.state, 'done', `${e.id} must not be called done without evidence`)
+    assert.equal(e.state, 'available')
+  }
+}
+
+// --- every ending carries its condition and its evidence --------------------
+{
+  const s = await endingStatus({
+    achievements: [ach('ACH02', true)],
+    killedBosses: LORDS_DEAD,
+  })
+  for (const e of s.endings) {
     assert.ok(e.condition && e.condition.length > 5, `${e.id} has no condition`)
+    assert.ok(e.evidence && e.evidence.length > 5, `${e.id} has no evidence`)
   }
 }
 
-// --- flame lit: that ending is confirmed, and Lord of Cinder is not ---
-{
-  const s = await endingStatus({
-    flags: { [FLAME]: 1, [LORDS]: 1, [GAEL]: 1 },
-    killedBosses: ['奴仆骑士盖尔'],
-  })
-  const byId = Object.fromEntries(s.endings.map((e) => [e.id, e]))
-  assert.equal(byId['link-the-flame'].state, 'done', 'Link the Flame should be confirmed')
-  assert.equal(byId['lord-of-cinder'].state, 'ambiguous', 'Lord of Cinder must not also claim done')
-}
-
-// --- nothing done yet ---
-{
-  const s = await endingStatus({ flags: {}, killedBosses: [] })
-  for (const e of s.endings) {
-    assert.equal(e.state, 'locked', `${e.id} should be locked on a fresh character`)
-  }
-}
-
-// --- the module must never publish a completion count it cannot support ---
-{
-  const s = await endingStatus({
-    flags: { [FLAME]: 0, [LORDS]: 1, [GAEL]: 1 },
-    killedBosses: [],
-  })
-  assert.equal(s.total, 4)
-  assert.ok(s.confirmed <= 1, 'at most one ending is confirmable from this save')
-}
-
-console.log('ok: endings report evidence and never overcount')
+console.log('ok: endings use achievements for "reached" and the save for "still open"')

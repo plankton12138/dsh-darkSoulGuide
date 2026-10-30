@@ -1,0 +1,609 @@
+{
+  "_note": "DS3 Steam 成就表。来源：Nemirtingas/games-infos-datas 的 steam/374320/achievements_db.json（Steam 公开的成就 schema）。只保留 API 名与各语言名称/描述，图标 URL 不入库。 只保留 en/zh 三种语言，其余语种已裁掉以控制体积。",
+  "_appid": "374320",
+  "_why": "游戏的成就名只存在 Steam 侧：游戏本体文本锁在加密的 BHD 索引后，社区页又默认开启剧透模式把名字隐藏起来。Steam 的成就 schema 文件是公开数据，能一次拿到全部 43 项的名字。",
+  "achievements": [
+    {
+      "api": "ACH00",
+      "hidden": false,
+      "names": {
+        "english": "The Dark Soul",
+        "schinese": "黑暗灵魂",
+        "tchinese": "黑暗靈魂"
+      },
+      "descriptions": {
+        "english": "Complete all achievements.",
+        "schinese": "取得所有成就",
+        "tchinese": "取得所有成就"
+      }
+    },
+    {
+      "api": "ACH01",
+      "hidden": true,
+      "names": {
+        "english": "To Link the First Flame",
+        "schinese": "初始之火的继承者",
+        "tchinese": "初始之火的繼承者"
+      },
+      "descriptions": {
+        "english": "Reach \"To Link the First Flame\" ending.",
+        "schinese": "达成“初始之火的继承者”结局",
+        "tchinese": "達成「初始之火的繼承者」結局"
+      }
+    },
+    {
+      "api": "ACH02",
+      "hidden": true,
+      "names": {
+        "english": "The End of Fire",
+        "schinese": "传火终结",
+        "tchinese": "傳火終結"
+      },
+      "descriptions": {
+        "english": "Reach \"The End of Fire\" ending.",
+        "schinese": "达成“传火终结”结局",
+        "tchinese": "達成「傳火終結」結局"
+      }
+    },
+    {
+      "api": "ACH03",
+      "hidden": true,
+      "names": {
+        "english": "The Usurpation of Fire",
+        "schinese": "火的篡位者",
+        "tchinese": "火的篡位者"
+      },
+      "descriptions": {
+        "english": "Reach \"The Usurpation of Fire\" ending.",
+        "schinese": "达成“火的篡位者”结局",
+        "tchinese": "達成「火的篡位者」結局"
+      }
+    },
+    {
+      "api": "ACH04",
+      "hidden": true,
+      "names": {
+        "english": "Lords of Cinder: Abyss Watchers",
+        "schinese": "薪王──深渊的监视者",
+        "tchinese": "薪王──深淵的監視者"
+      },
+      "descriptions": {
+        "english": "Defeat the Abyss Watchers, Lords of Cinder.",
+        "schinese": "击败薪王“深渊的监视者”",
+        "tchinese": "擊敗薪王「深淵的監視者」"
+      }
+    },
+    {
+      "api": "ACH05",
+      "hidden": true,
+      "names": {
+        "english": "Lord of Cinder: Yhorm the Giant",
+        "schinese": "薪王──巨人尤姆",
+        "tchinese": "薪王──巨人尤姆"
+      },
+      "descriptions": {
+        "english": "Defeat Yhorm the Giant, Lord of Cinder.",
+        "schinese": "击败薪王“巨人尤姆”",
+        "tchinese": "擊敗薪王「巨人尤姆」"
+      }
+    },
+    {
+      "api": "ACH06",
+      "hidden": true,
+      "names": {
+        "english": "Lord of Cinder: Aldrich, Devourer of Gods",
+        "schinese": "薪王──吞噬神明的艾尔德利奇",
+        "tchinese": "薪王──吞噬神祇的艾爾德利奇"
+      },
+      "descriptions": {
+        "english": "Defeat Aldrich, Devourer of Gods, Lord of Cinder.",
+        "schinese": "击败薪王“吞噬神明的艾尔德利奇”",
+        "tchinese": "擊敗薪王「吞噬神祇的艾爾德利奇」"
+      }
+    },
+    {
+      "api": "ACH07",
+      "hidden": true,
+      "names": {
+        "english": "Lord of Cinder: Lothric, Younger Prince",
+        "schinese": "薪王──洛斯里克王子",
+        "tchinese": "薪王──洛斯里克王子"
+      },
+      "descriptions": {
+        "english": "Defeat Lothric, Younger Prince, Lord of Cinder.",
+        "schinese": "击败薪王“洛斯里克王子”",
+        "tchinese": "擊敗薪王「洛斯里克王子」"
+      }
+    },
+    {
+      "api": "ACH08",
+      "hidden": false,
+      "names": {
+        "english": "Supreme Weapon Reinforcement",
+        "schinese": "极致武器强化",
+        "tchinese": "極致武器強化"
+      },
+      "descriptions": {
+        "english": "Reinforce any weapon to the highest level.",
+        "schinese": "将任一武器强化到极限",
+        "tchinese": "將任一武器強化到極限"
+      }
+    },
+    {
+      "api": "ACH09",
+      "hidden": false,
+      "names": {
+        "english": "Master of Infusion",
+        "schinese": "所有的质变强化",
+        "tchinese": "所有的質變強化"
+      },
+      "descriptions": {
+        "english": "Perform all forms of infusion.",
+        "schinese": "完成所有质变强化",
+        "tchinese": "完成所有質變強化"
+      }
+    },
+    {
+      "api": "ACH10",
+      "hidden": false,
+      "names": {
+        "english": "Master of Sorceries",
+        "schinese": "所有的魔法",
+        "tchinese": "所有的魔法"
+      },
+      "descriptions": {
+        "english": "Acquire all sorceries.",
+        "schinese": "取得所有魔法",
+        "tchinese": "取得所有魔法"
+      }
+    },
+    {
+      "api": "ACH11",
+      "hidden": false,
+      "names": {
+        "english": "Master of Pyromancies",
+        "schinese": "所有的咒术",
+        "tchinese": "所有的咒術"
+      },
+      "descriptions": {
+        "english": "Acquire all pyromancies.",
+        "schinese": "取得所有咒术",
+        "tchinese": "取得所有咒術"
+      }
+    },
+    {
+      "api": "ACH12",
+      "hidden": false,
+      "names": {
+        "english": "Master of Miracles",
+        "schinese": "所有的奇迹",
+        "tchinese": "所有的奇蹟"
+      },
+      "descriptions": {
+        "english": "Acquire all miracles.",
+        "schinese": "取得所有奇迹",
+        "tchinese": "取得所有奇蹟"
+      }
+    },
+    {
+      "api": "ACH13",
+      "hidden": false,
+      "names": {
+        "english": "Master of Rings",
+        "schinese": "所有的戒指",
+        "tchinese": "所有的戒指"
+      },
+      "descriptions": {
+        "english": "Acquire all rings.",
+        "schinese": "取得所有戒指",
+        "tchinese": "取得所有戒指"
+      }
+    },
+    {
+      "api": "ACH14",
+      "hidden": false,
+      "names": {
+        "english": "Master of Expression",
+        "schinese": "所有的肢体动作",
+        "tchinese": "所有的肢體動作"
+      },
+      "descriptions": {
+        "english": "Learn all gestures.",
+        "schinese": "取得所有肢体动作",
+        "tchinese": "取得所有肢體動作"
+      }
+    },
+    {
+      "api": "ACH15",
+      "hidden": false,
+      "names": {
+        "english": "Ultimate Bonfire",
+        "schinese": "最高级营火",
+        "tchinese": "最高級營火"
+      },
+      "descriptions": {
+        "english": "Reinforce a bonfire to the highest level.",
+        "schinese": "将营火强化到极限",
+        "tchinese": "將營火強化到極限"
+      }
+    },
+    {
+      "api": "ACH16",
+      "hidden": false,
+      "names": {
+        "english": "Ultimate Estus",
+        "schinese": "最高级原素瓶",
+        "tchinese": "最高級原素瓶"
+      },
+      "descriptions": {
+        "english": "Reinforce the Estus Flask to the highest level.",
+        "schinese": "将原素瓶强化到极限",
+        "tchinese": "將原素瓶強化到極限"
+      }
+    },
+    {
+      "api": "ACH17",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Warrior of Sunlight",
+        "schinese": "誓约“太阳战士”",
+        "tchinese": "誓約「太陽戰士」"
+      },
+      "descriptions": {
+        "english": "Discover Warrior of Sunlight covenant.",
+        "schinese": "找出誓约“太阳战士”",
+        "tchinese": "找出誓約「太陽戰士」"
+      }
+    },
+    {
+      "api": "ACH18",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Way of Blue",
+        "schinese": "誓约“青教”",
+        "tchinese": "誓約「青教」"
+      },
+      "descriptions": {
+        "english": "Discover Way of Blue covenant.",
+        "schinese": "找出誓约“青教”",
+        "tchinese": "找出誓約「青教」"
+      }
+    },
+    {
+      "api": "ACH19",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Blue Sentinels",
+        "schinese": "誓约“青之守护者”",
+        "tchinese": "誓約「青之守護者」"
+      },
+      "descriptions": {
+        "english": "Discover Blue Sentinels covenant.",
+        "schinese": "找出誓约“青之守护者”",
+        "tchinese": "找出誓約「青之守護者」"
+      }
+    },
+    {
+      "api": "ACH20",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Blade of the Darkmoon",
+        "schinese": "誓约“暗月之剑”",
+        "tchinese": "誓約「暗月之劍」"
+      },
+      "descriptions": {
+        "english": "Discover Blade of the Darkmoon covenant.",
+        "schinese": "找出誓约“暗月之剑”",
+        "tchinese": "找出誓約「暗月之劍」"
+      }
+    },
+    {
+      "api": "ACH21",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Rosaria's Fingers",
+        "schinese": "誓约“罗莎莉亚的指头”",
+        "tchinese": "誓約「羅莎莉亞的指頭」"
+      },
+      "descriptions": {
+        "english": "Discover Rosaria's Fingers covenant.",
+        "schinese": "找出誓约“罗莎莉亚的指头”",
+        "tchinese": "找出誓約「羅莎莉亞的指頭」"
+      }
+    },
+    {
+      "api": "ACH22",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Mound-makers",
+        "schinese": "誓约“累积者”",
+        "tchinese": "誓約「累積者」"
+      },
+      "descriptions": {
+        "english": "Discover Mound-makers covenant.",
+        "schinese": "找出誓约“累积者”",
+        "tchinese": "找出誓約「累積者」"
+      }
+    },
+    {
+      "api": "ACH23",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Watchdogs of Farron",
+        "schinese": "誓约“法兰守卫”",
+        "tchinese": "誓約「法蘭守衛」"
+      },
+      "descriptions": {
+        "english": "Discover Watchdogs of Farron covenant.",
+        "schinese": "找出誓约“法兰守卫”",
+        "tchinese": "找出誓約「法蘭守衛」"
+      }
+    },
+    {
+      "api": "ACH24",
+      "hidden": true,
+      "names": {
+        "english": "Covenant: Aldrich Faithful",
+        "schinese": "誓约“吞噬神明的守护人”",
+        "tchinese": "誓約「吞噬神祇的守護人」"
+      },
+      "descriptions": {
+        "english": "Discover Aldrich Faithful covenant.",
+        "schinese": "找出誓约“吞噬神明的守护人”",
+        "tchinese": "找出誓約「吞噬神祇的守護人」"
+      }
+    },
+    {
+      "api": "ACH25",
+      "hidden": true,
+      "names": {
+        "english": "Untended Graves",
+        "schinese": "无主墓地",
+        "tchinese": "無主墓地"
+      },
+      "descriptions": {
+        "english": "Reach the Untended Graves.",
+        "schinese": "抵达“无主墓地”",
+        "tchinese": "抵達「無主墓地」"
+      }
+    },
+    {
+      "api": "ACH26",
+      "hidden": true,
+      "names": {
+        "english": "Archdragon Peak",
+        "schinese": "古龙顶端",
+        "tchinese": "古龍頂端"
+      },
+      "descriptions": {
+        "english": "Reach Archdragon Peak.",
+        "schinese": "抵达“古龙顶端”",
+        "tchinese": "抵達「古龍頂端」"
+      }
+    },
+    {
+      "api": "ACH27",
+      "hidden": true,
+      "names": {
+        "english": "Iudex Gundyr",
+        "schinese": "“灰烬审判者”古达",
+        "tchinese": "「灰燼審判者」古達"
+      },
+      "descriptions": {
+        "english": "Defeat Iudex Gundyr.",
+        "schinese": "击败“‘ 灰烬审判者’古达”",
+        "tchinese": "擊敗「『灰燼審判者』古達」"
+      }
+    },
+    {
+      "api": "ACH28",
+      "hidden": true,
+      "names": {
+        "english": "Vordt of the Boreal Valley",
+        "schinese": "冷冽谷的玻尔多",
+        "tchinese": "冷冽谷的玻爾多"
+      },
+      "descriptions": {
+        "english": "Defeat Vordt of the Boreal Valley.",
+        "schinese": "击败“冷冽谷的玻尔多”",
+        "tchinese": "擊敗「冷冽谷的玻爾多」"
+      }
+    },
+    {
+      "api": "ACH29",
+      "hidden": true,
+      "names": {
+        "english": "Curse-rotted Greatwood",
+        "schinese": "咒蚀大树",
+        "tchinese": "咒蝕大樹"
+      },
+      "descriptions": {
+        "english": "Defeat the Curse-rotted Greatwood.",
+        "schinese": "击败“咒蚀大树”",
+        "tchinese": "擊敗「咒蝕大樹」"
+      }
+    },
+    {
+      "api": "ACH30",
+      "hidden": true,
+      "names": {
+        "english": "Crystal Sage",
+        "schinese": "结晶老者",
+        "tchinese": "結晶老者"
+      },
+      "descriptions": {
+        "english": "Defeat Crystal Sage.",
+        "schinese": "击败“结晶老者”",
+        "tchinese": "擊敗「結晶老者」"
+      }
+    },
+    {
+      "api": "ACH31",
+      "hidden": true,
+      "names": {
+        "english": "Deacons of the Deep",
+        "schinese": "幽邃主教群",
+        "tchinese": "幽邃主教群"
+      },
+      "descriptions": {
+        "english": "Defeat the Deacons of the Deep.",
+        "schinese": "击败“幽邃主教群”",
+        "tchinese": "擊敗「幽邃主教群」"
+      }
+    },
+    {
+      "api": "ACH32",
+      "hidden": true,
+      "names": {
+        "english": "High Lord Wolnir",
+        "schinese": "霸王沃尼尔",
+        "tchinese": "霸王沃尼爾"
+      },
+      "descriptions": {
+        "english": "Defeat High Lord Wolnir.",
+        "schinese": "击败“霸王沃尼尔”",
+        "tchinese": "擊敗「霸王沃尼爾」"
+      }
+    },
+    {
+      "api": "ACH33",
+      "hidden": true,
+      "names": {
+        "english": "Pontiff Sulyvahn",
+        "schinese": "教宗沙力万",
+        "tchinese": "教宗沙力萬"
+      },
+      "descriptions": {
+        "english": "Defeat Pontiff Sulyvahn.",
+        "schinese": "击败“教宗沙力万”",
+        "tchinese": "擊敗「教宗沙力萬」"
+      }
+    },
+    {
+      "api": "ACH34",
+      "hidden": true,
+      "names": {
+        "english": "Dancer of the Boreal Valley",
+        "schinese": "冷冽谷的舞娘",
+        "tchinese": "冷冽谷的舞孃"
+      },
+      "descriptions": {
+        "english": "Defeat Dancer of the Boreal Valley.",
+        "schinese": "击败“冷冽谷的舞娘”",
+        "tchinese": "擊敗「冷冽谷的舞孃」"
+      }
+    },
+    {
+      "api": "ACH35",
+      "hidden": true,
+      "names": {
+        "english": "Dragonslayer Armour",
+        "schinese": "猎龙铠甲",
+        "tchinese": "獵龍鎧甲"
+      },
+      "descriptions": {
+        "english": "Defeat Dragonslayer Armour.",
+        "schinese": "击败“猎龙铠甲”",
+        "tchinese": "擊敗「獵龍鎧甲」"
+      }
+    },
+    {
+      "api": "ACH36",
+      "hidden": true,
+      "names": {
+        "english": "Old Demon King",
+        "schinese": "老恶魔王",
+        "tchinese": "老惡魔王"
+      },
+      "descriptions": {
+        "english": "Defeat Old Demon King.",
+        "schinese": "击败“老恶魔王”",
+        "tchinese": "擊敗「老惡魔王」"
+      }
+    },
+    {
+      "api": "ACH37",
+      "hidden": true,
+      "names": {
+        "english": "Oceiros, the Consumed King",
+        "schinese": "妖王欧斯罗艾斯",
+        "tchinese": "妖王歐斯羅艾斯"
+      },
+      "descriptions": {
+        "english": "Defeat Oceiros, the Consumed King.",
+        "schinese": "击败“妖王欧斯罗艾斯”",
+        "tchinese": "擊敗「妖王歐斯羅艾斯」"
+      }
+    },
+    {
+      "api": "ACH38",
+      "hidden": true,
+      "names": {
+        "english": "Champion Gundyr",
+        "schinese": "英雄古达",
+        "tchinese": "英雄古達"
+      },
+      "descriptions": {
+        "english": "Defeat Champion Gundyr.",
+        "schinese": "击败“英雄古达”",
+        "tchinese": "擊敗「英雄古達」"
+      }
+    },
+    {
+      "api": "ACH39",
+      "hidden": true,
+      "names": {
+        "english": "Ancient Wyvern",
+        "schinese": "古老飞龙",
+        "tchinese": "古老飛龍"
+      },
+      "descriptions": {
+        "english": "Defeat Ancient Wyvern.",
+        "schinese": "击败“古老飞龙”",
+        "tchinese": "擊敗「古老飛龍」"
+      }
+    },
+    {
+      "api": "ACH40",
+      "hidden": true,
+      "names": {
+        "english": "The Nameless King",
+        "schinese": "无名王者",
+        "tchinese": "無名王者"
+      },
+      "descriptions": {
+        "english": "Defeat Nameless King.",
+        "schinese": "击败“无名王者”",
+        "tchinese": "擊敗「無名王者」"
+      }
+    },
+    {
+      "api": "ACH41",
+      "hidden": false,
+      "names": {
+        "english": "Enkindle",
+        "schinese": "点燃营火",
+        "tchinese": "點燃營火"
+      },
+      "descriptions": {
+        "english": "Light a bonfire flame for the first time.",
+        "schinese": "点燃第一座营火",
+        "tchinese": "點燃第一座營火"
+      }
+    },
+    {
+      "api": "ACH42",
+      "hidden": false,
+      "names": {
+        "english": "Embrace the Flame",
+        "schinese": "得到火的力量",
+        "tchinese": "得到火的力量"
+      },
+      "descriptions": {
+        "english": "Become a Host of Embers for the first time.",
+        "schinese": "第一次得到火的力量",
+        "tchinese": "第一次得到火的力量"
+      }
+    }
+  ]
+}

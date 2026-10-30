@@ -41,8 +41,24 @@ const RING_COVENANT_RANGE = [536880000, 536890000]
  * @param {object} args.axes              output of buildAxes
  * @param {object} args.bosses            { killed, total }
  */
-export function achievementStatus({ owned, bagNames, rings, axes, bosses }) {
+export function achievementStatus({ owned, bagNames, rings, axes, bosses, steam = null }) {
   const entries = []
+
+  // Steam's own achievements replace any estimate. When the Steam data is
+  // present it is the authority; the item-derived axes stay as a cross-check.
+  if (steam?.items?.length) {
+    const done = steam.items.filter((a) => a.unlocked).length
+    entries.push({
+      id: 'steam-achievements',
+      name: 'Steam 成就',
+      group: 'steam',
+      verifiable: true,
+      have: done,
+      total: steam.items.length,
+      missing: steam.items.filter((a) => !a.unlocked).map((a) => a.name ?? a.api),
+      note: `来自 Steam 客户端的本地成就记录（${steam.persona ?? '未识别账号'}），解锁时间跨周目保留。`,
+    })
+  }
 
   // --- verifiable: derived from item ids and boss flags -------------------
   entries.push({
@@ -143,14 +159,14 @@ export function achievementStatus({ owned, bagNames, rings, axes, bosses }) {
     verifiable: false,
     reason: '碎片在拾取时即被消耗，存档不留计数器。',
   })
-  // Endings are tracked by their own module, which reports per-ending what
-  // the save shows. Listing them here as unverifiable would contradict it.
+  // Endings have their own module, which reports per-ending what the save
+  // shows. Listing them here as unverifiable would contradict it.
   entries.push({
     id: 'endings',
     name: '全部结局',
     group: 'story',
     verifiable: false,
-    reason: '存档只保留初始之火是否点燃，无法分辨篡火与传火终结，也没有已触发结局的清单。逐个结局的状态见结局模块。',
+    reason: '结局的达成记录只存在于 Steam 成就里（见上面那一条）；存档分辨不出。三个结局的逐项状态见结局区块。',
   })
 
   const verifiable = entries.filter((e) => e.verifiable)
