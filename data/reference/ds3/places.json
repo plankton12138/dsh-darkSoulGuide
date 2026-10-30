@@ -53,6 +53,246 @@
       "saveCheck": { "kind": "covenant", "id": "Blade of the Darkmoon" },
       "sources": ["fextra-yorshka", "gamersky-darkmoon", "fextra-sirris"],
       "confidence": "high"
+    },
+    {
+      "id": "sunlight-covenant",
+      "kind": "covenant",
+      "name": { "zh": "太阳战士", "en": "Warrior of Sunlight" },
+      "aliases": ["太阳战士", "太阳徽章", "Warrior of Sunlight", "Sunlight"],
+      "where": {
+        "area": "不死聚落",
+        "bonfireId": "13100000",
+        "bonfireName": "Undead Settlement（不死聚落）",
+        "landmark": "从篝火出发穿过尸屋与燃烧的树，沿石拱门进入第一栋房子，地板破洞下方",
+        "note": "誓约道具在吊满尸体的房间地板缺口下，跳下去拿。"
+      },
+      "steps": [
+        "传送到「不死聚落」篝火",
+        "向左穿过尸屋，经过亡灵膜拜的燃烧之树",
+        "直行到另一片房屋，走到下行楼梯尽头",
+        "穿过石拱门，进入正前方第一栋房子的门",
+        "房间是吊满尸体的那种；从地板缺口跳下去拿誓约道具",
+        "拿到「太阳战士」后装备它即可加入"
+      ],
+      "requires": [],
+      "gotchas": [
+        "加入方式是「获得道具并装备」，不是找 NPC 对话，别在祭坛前找交互点。"
+      ],
+      "missable": false,
+      "achievement": {
+        "api": "ACH17",
+        "condition": "Discover Warrior of Sunlight covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Warrior of Sunlight" },
+      "sources": ["fextra-sunlight"],
+      "confidence": "high"
+    },
+    {
+      "id": "wayblue-covenant",
+      "kind": "covenant",
+      "name": { "zh": "青教", "en": "Way of Blue" },
+      "aliases": ["青教", "Way of Blue"],
+      "where": {
+        "area": "洛斯里克高墙",
+        "bonfireId": "13000001",
+        "bonfireName": "High Wall of Lothric（洛斯里克高墙）",
+        "landmark": "玻尔多 Boss 战对面、艾玛所在的大教堂",
+        "note": "和艾玛对话到底，她会给你誓约道具。"
+      },
+      "steps": [
+        "传送到高墙区域，前往玻尔多（Vordt）Boss 战对面的教堂",
+        "找到 NPC 艾玛（Emma）",
+        "把她的对话聊到底",
+        "拿到「青教」道具后装备即可加入"
+      ],
+      "requires": [],
+      "gotchas": [
+        "这是最早能拿的誓约之一，路过顺手就拿，不用专门跑。"
+      ],
+      "missable": false,
+      "achievement": {
+        "api": "ACH18",
+        "condition": "Discover Way of Blue covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Way of Blue" },
+      "sources": ["fextra-wayblue"],
+      "confidence": "high"
+    },
+    {
+      "id": "bluesentinels-covenant",
+      "kind": "covenant",
+      "name": { "zh": "青之守护者", "en": "Blue Sentinels" },
+      "aliases": ["青之守护者", "Blue Sentinels"],
+      "where": {
+        "area": "牺牲之路",
+        "bonfireId": "13200000",
+        "bonfireName": "Halfway Fortress（牺牲之路）",
+        "landmark": "篝火旁的 NPC 安里（Anri of Astora）与霍拉斯（Horace the Hushed）",
+        "note": "第一次对话就给。错过的话，击败幽邃主教群后可在传火祭祀场补拿。"
+      },
+      "steps": [
+        "传送到「Halfway Fortress」篝火（牺牲之路）",
+        "和篝火旁的安里、霍拉斯对话",
+        "获得「青之守护者」道具并装备"
+      ],
+      "requires": [],
+      "gotchas": [
+        "错过第一次也没关系：击败幽邃主教群（Deacons of the Deep）后，可以在传火祭祀场再拿一次。"
+      ],
+      "missable": false,
+      "achievement": {
+        "api": "ACH19",
+        "condition": "Discover Blue Sentinels covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Blue Sentinels" },
+      "sources": ["fextra-bluesent"],
+      "confidence": "high"
+    },
+    {
+      "id": "rosaria-covenant",
+      "kind": "covenant",
+      "name": { "zh": "罗莎莉亚的指头", "en": "Rosaria's Fingers" },
+      "aliases": ["罗莎莉亚", "Rosaria", "Rosaria's Fingers", "发青的舌头"],
+      "where": {
+        "area": "深邃教堂",
+        "bonfireId": "13500000",
+        "bonfireName": "Rosaria's Bed Chamber（罗莎莉亚的寝宫）",
+        "landmark": "深邃教堂深处的寝宫，罗莎莉亚本人在那里",
+        "note": "和她对话即得誓约道具。"
+      },
+      "steps": [
+        "进入深邃教堂（Cathedral of the Deep）",
+        "找到罗莎莉亚的寝宫，篝火就在旁边",
+        "和罗莎莉亚对话",
+        "获得「罗莎莉亚的指头」道具并装备"
+      ],
+      "requires": [],
+      "gotchas": [
+        "**只要不献上发青的舌头，就不会中断希里丝支线。** 单纯发现誓约、甚至做「重生」改点/改外貌都不影响。",
+        "一旦向罗莎莉亚献上发青舌头，希里丝会立刻离开传火祭祀场，她的支线永久中断——而她的支线正是「暗月的誓约礼」姿势的来源。",
+        "想拿暗月之剑，就先别献舌头。"
+      ],
+      "missable": true,
+      "missableReason": "献上发青舌头会中断希里丝支线，进而导致暗月之剑本周目无法加入。",
+      "achievement": {
+        "api": "ACH21",
+        "condition": "Discover Rosaria's Fingers covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Rosaria's Fingers" },
+      "sources": ["fextra-rosaria"],
+      "confidence": "high"
+    },
+    {
+      "id": "moundmakers-covenant",
+      "kind": "covenant",
+      "name": { "zh": "累积者", "en": "Mound-Makers" },
+      "aliases": ["累积者", "枷锁脊椎骨", "Mound-Makers", "Mound Makers", "Hodrick"],
+      "where": {
+        "area": "不死聚落",
+        "bonfireId": "13100000",
+        "bonfireName": "Undead Settlement（不死聚落）",
+        "landmark": "过木桥后砸开木箱木桶，绕到马厩后方，爬上小屋梯子再从屋顶右侧跳下，钻进背笼子的大个子的笼子",
+        "note": "必须在咒蚀大树（Curse-Rotted Greatwood）砸穿地面之前完成。"
+      },
+      "steps": [
+        "从「不死聚落」篝火出发，穿过房子到传教士与燃烧堆所在的营地（拿罗蕾塔之骨那里）",
+        "右转，过木桥",
+        "桥对岸有一堆木箱木桶，砸开它们，绕到马厩后面（不要进门）",
+        "在一栋带梯子的小屋后方，会看到背笼子的大个子",
+        "爬上小屋梯子，从屋顶右侧跳下",
+        "走近大个子的笼子，按交互键查看",
+        "过场动画后会被传送到圣骑士霍德里克（Holy Knight Hodrick）面前，由他授予誓约"
+      ],
+      "requires": [
+        {
+          "kind": "timing",
+          "name": "在咒蚀大树砸穿地面之前",
+          "why": "Boss 战会改变地形，之后原地形不可用",
+          "saveVerifiable": false,
+          "ifMissing": "若咒蚀大树已击败且当时没拿，本周目可能拿不到，需查证或等下周目"
+        }
+      ],
+      "gotchas": [
+        "不能带召唤灵、也不能在被入侵状态下进行。",
+        "加入后没有正常离开的路，只能用归家骨片（和霍德里克对话第三次他会给一片），或者退出重进。",
+        "退出重进会回到进笼子的位置，且已杀的敌人不会复活。"
+      ],
+      "missable": true,
+      "missableReason": "受地形时点限制，且进入后被传送、没有正常出路。",
+      "achievement": {
+        "api": "ACH22",
+        "condition": "Discover Mound-makers covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Mound-makers" },
+      "sources": ["fextra-moundmaker"],
+      "confidence": "high"
+    },
+    {
+      "id": "farron-covenant",
+      "kind": "covenant",
+      "name": { "zh": "法兰守卫", "en": "Watchdogs of Farron" },
+      "aliases": ["法兰守卫", "老狼", "狼血剑草", "Watchdogs of Farron", "Old Wolf"],
+      "where": {
+        "area": "法兰要塞",
+        "bonfireId": "13300000",
+        "bonfireName": "Farron Keep（法兰要塞）",
+        "landmark": "毒沼泽中一座高梯子的顶端，梯子底部靠近一个骨灰碎片；顶上向老狼（Old Wolf of Farron）祈祷",
+        "note": "向老狼祈祷即可获得誓约道具。"
+      },
+      "steps": [
+        "进入法兰要塞（Farron Keep）的毒沼泽",
+        "找到一座高梯子（底部附近有骨灰碎片）",
+        "爬上梯子到顶",
+        "向老狼（Old Wolf of Farron）祈祷，获得「法兰守卫」道具",
+        "装备即可加入"
+      ],
+      "requires": [],
+      "gotchas": [
+        "沼泽有毒，跑图前先备好解毒素或相应戒指。"
+      ],
+      "missable": false,
+      "achievement": {
+        "api": "ACH23",
+        "condition": "Discover Watchdogs of Farron covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Watchdogs of Farron" },
+      "sources": ["fextra-farron"],
+      "confidence": "high"
+    },
+    {
+      "id": "aldrich-covenant",
+      "kind": "covenant",
+      "name": { "zh": "吞噬神明的守护人", "en": "Aldrich Faithful" },
+      "aliases": ["吞噬神明的守护人", "人心沉淀物", "Aldrich Faithful", "McDonnell"],
+      "where": {
+        "area": "伊鲁席尔",
+        "bonfireId": "13700001",
+        "bonfireName": "Pontiff Sulyvahn（教宗沙力万）",
+        "landmark": "教宗篝火直行出门、左上楼梯、右穿死巨人谷、尽头门内左手边可击碎的墙后有梯子",
+        "note": "下梯后击败两只沙力万的野兽，房间西北角的**麦克唐纳大主教**（Archdeacon McDonnell）给你誓约。"
+      },
+      "steps": [
+        "传送到「教宗沙力万」篝火",
+        "直行穿过门",
+        "左上楼梯，再向右穿过死巨人所在的谷地",
+        "进入最尽头的门",
+        "左手边有一面可以打碎的墙，墙后有梯子",
+        "下梯子，击败守卫的两只沙力万的野兽（Sulyvahn's Beasts）",
+        "房间西北角找到麦克唐纳大主教，向他缔结誓约"
+      ],
+      "requires": [],
+      "gotchas": [
+        "那面墙是**隐藏墙**，需要主动攻击才能破开，没有提示。",
+        "两只野兽同时上，伤害很高。"
+      ],
+      "missable": false,
+      "achievement": {
+        "api": "ACH24",
+        "condition": "Discover Aldrich Faithful covenant."
+      },
+      "saveCheck": { "kind": "covenant", "id": "Aldrich Faithful" },
+      "sources": ["fextra-aldrich"],
+      "confidence": "high"
     }
   ]
 }

@@ -90,4 +90,35 @@ const HAS_DARKMOON = { covenantNames: new Set(['Blade of the Darkmoon']) }
   assert.ok(/ds3_sources/.test(r.hint ?? ''), 'a miss must redirect to the citation tool')
 }
 
+// --- similar-sounding names must not outrank the exact one ------------------
+// 青之守护者 and 吞噬神明的守护人 share the bigram 守护, so a naive scorer tied
+// them and asking about one surfaced the other first.
+{
+  for (const [q, want] of [
+    ['青之守护者', '青之守护者'],
+    ['吞噬神明的守护人', '吞噬神明的守护人'],
+    ['青教', '青教'],
+  ]) {
+    const r = await findPlaces(q, NO_COVENANTS)
+    assert.ok(r.matches.length > 0, `no match for ${q}`)
+    assert.equal(
+      r.matches[0].name.zh,
+      want,
+      `query "${q}" ranked "${r.matches[0].name.zh}" first`,
+    )
+  }
+}
+
+// --- every covenant achievement is covered by a guide -----------------------
+// Each of ACH17..ACH24 should have a place, or the panel silently stops
+// offering a route for it.
+{
+  const r = await allPlaces(NO_COVENANTS)
+  const have = new Set(r.matches.map((g) => g.achievement?.api).filter(Boolean))
+  const want = ['ACH17', 'ACH18', 'ACH19', 'ACH20', 'ACH21', 'ACH22', 'ACH23', 'ACH24']
+  for (const api of want) {
+    assert.ok(have.has(api), `no place guide covers covenant achievement ${api}`)
+  }
+}
+
 console.log('ok: place guides are three-part, and never guess an unverifiable prerequisite')

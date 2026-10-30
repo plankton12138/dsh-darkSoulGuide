@@ -55,22 +55,32 @@ function terms(query) {
   return [...out]
 }
 
+/**
+ * Score a place against the query terms.
+ *
+ * Name and alias hits weigh more than descriptive-field hits. Without that,
+ * "青之守护者" and "吞噬神明的守护人" both match on the shared bigram "守护" and
+ * come back tied, so asking about one covenant also surfaces the other. An exact
+ * name or alias match is decisive; a hit in the area/bonfire text only breaks
+ * ties.
+ */
 function scorePlace(place, list) {
-  const fields = [
-    place.name?.zh,
-    place.name?.en,
-    ...(place.aliases ?? []),
-    place.where?.area,
-    place.where?.bonfireName,
-    place.achievement?.api,
-  ]
+  const names = [place.name?.zh, place.name?.en, ...(place.aliases ?? [])]
     .filter(Boolean)
     .join(' ')
     .toLowerCase()
+  const rest = [place.where?.area, place.where?.bonfireName, place.achievement?.api]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+
   let n = 0
   for (const t of list) {
     if (!t) continue
-    if (fields.includes(t)) n += 1
+    // An exact name/alias match dominates everything else.
+    if (names === t) n += 10
+    else if (names.includes(t)) n += 3
+    if (rest.includes(t)) n += 1
   }
   return n
 }

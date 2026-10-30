@@ -94,6 +94,62 @@
       "covers": "暗月之剑奖杯的中文达成步骤：先取姿势，再到阿诺尔隆德隐形路",
       "use_for": ["暗月之剑", "成就攻略", "誓约加入"],
       "caveat": "中文，面向奖杯。步骤描述较简，细节以 Fextralife 为准。"
+    },
+    {
+      "id": "fextra-sunlight",
+      "title": "Fextralife · Warrior of Sunlight",
+      "url": "https://darksouls3.wiki.fextralife.com/Warrior+of+Sunlight",
+      "covers": "太阳战士誓约道具在不死聚落的具体位置与拿法",
+      "use_for": ["太阳战士", "誓约加入", "不死聚落"],
+      "caveat": "英文。"
+    },
+    {
+      "id": "fextra-wayblue",
+      "title": "Fextralife · Way of Blue",
+      "url": "https://darksouls3.wiki.fextralife.com/Way+of+Blue",
+      "covers": "青教誓约：向艾玛聊到底取得道具",
+      "use_for": ["青教", "誓约加入", "艾玛"],
+      "caveat": "英文。"
+    },
+    {
+      "id": "fextra-bluesent",
+      "title": "Fextralife · Blue Sentinels",
+      "url": "https://darksouls3.wiki.fextralife.com/Blue+Sentinels",
+      "covers": "青之守护者誓约：安里与霍拉斯给，错过可在祭祀场补拿",
+      "use_for": ["青之守护者", "誓约加入", "安里", "霍拉斯"],
+      "caveat": "英文。"
+    },
+    {
+      "id": "fextra-rosaria",
+      "title": "Fextralife · Rosaria's Fingers",
+      "url": "https://darksouls3.wiki.fextralife.com/Rosaria%27s+Fingers",
+      "covers": "罗莎莉亚的指头誓约，以及献舌头会中断希里丝支线的说明",
+      "use_for": ["罗莎莉亚", "誓约加入", "发青的舌头", "希里丝支线"],
+      "caveat": "英文。页面明确写了「献任何数量的发青舌头都会结束希里丝支线」。"
+    },
+    {
+      "id": "fextra-moundmaker",
+      "title": "Fextralife · Mound-Maker",
+      "url": "https://darksouls3.wiki.fextralife.com/Mound-Maker",
+      "covers": "累积者誓约：不死聚落笼子流程、地形时点限制、离开方式",
+      "use_for": ["累积者", "誓约加入", "Hodrick", "枷锁脊椎骨"],
+      "caveat": "英文。注意页面名是单数 Mound-Maker，复数链接会 404。"
+    },
+    {
+      "id": "fextra-farron",
+      "title": "Fextralife · Watchdogs of Farron",
+      "url": "https://darksouls3.wiki.fextralife.com/Watchdogs+of+Farron",
+      "covers": "法兰守卫誓约：毒沼泽高梯子上向老狼祈祷",
+      "use_for": ["法兰守卫", "誓约加入", "老狼", "法兰要塞"],
+      "caveat": "英文。"
+    },
+    {
+      "id": "fextra-aldrich",
+      "title": "Fextralife · Aldrich Faithful",
+      "url": "https://darksouls3.wiki.fextralife.com/Aldrich+Faithful",
+      "covers": "吞噬神明的守护人誓约：教宗篝火到隐藏墙与麦克唐纳大主教",
+      "use_for": ["吞噬神明的守护人", "誓约加入", "麦克唐纳", "隐藏墙"],
+      "caveat": "英文。"
     }
   ]
 }
