@@ -13,6 +13,7 @@
 import { Ds3Error, listCharacters } from '../parsers/ds3/run.js'
 import { loadRoutes } from '../state/route.js'
 import { overview } from '../state/overview.js'
+import { allPlaces } from '../state/places.js'
 
 /** Turn a parser failure into something the panel can render and act on. */
 function failure(err) {
@@ -52,6 +53,22 @@ export async function buildProgress() {
     areas[row.area] = { lit: row.lit, total: row.total }
   }
 
+  // Place guides: the panel shows the ones still actionable, so the player can
+  // see the route without asking. A guide whose save check says "owned" is
+  // dropped — the point of the list is what is left to do.
+  let places = { matches: [], total: 0 }
+  try {
+    const cov = new Set(
+      (o.axes?.covenants ?? []).filter((c) => c.owned).map((c) => c.name),
+    )
+    places = await allPlaces({ covenantNames: cov })
+  } catch {
+    // A missing or malformed places.json must not take down the whole panel;
+    // the rest of the sidebar is still useful without it.
+    places = { matches: [], total: 0 }
+  }
+  const placesOpen = (places.matches ?? []).filter((p) => p.status?.state !== 'owned')
+
   return {
     ok: true,
     character: {
@@ -75,6 +92,7 @@ export async function buildProgress() {
     achievements: o.achievements,
     endings: o.endings,
     steam: o.steam,
+    places: { items: placesOpen, total: places.total ?? 0 },
     edges: routes.edges.map((e) => ({ from: e.from, to: e.to })),
     updatedAt: new Date().toISOString(),
   }

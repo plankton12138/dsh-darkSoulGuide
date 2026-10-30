@@ -11,6 +11,7 @@
 import { registerTools } from './src/tools/ds3.js'
 import { registerOverviewTool } from './src/tools/overview.js'
 import { registerSourcesTool } from './src/tools/sources.js'
+import { registerPlacesTool } from './src/tools/places.js'
 import { invalidate, registerPrompt } from './src/prompt/guide.js'
 import { buildProgress } from './src/panel/progress.js'
 
@@ -86,6 +87,7 @@ export function apply(ctx, config = {}) {
     registerTools(ctx)
     registerOverviewTool(ctx)
     registerSourcesTool(ctx)
+    registerPlacesTool(ctx)
   }
 
   if (wantPrompt) {

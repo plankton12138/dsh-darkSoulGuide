@@ -805,6 +805,170 @@ window.__ModuleLoader__.load({
       )
     }
 
+    /**
+     * Place guides: where to go, from which bonfire, and what will bite you.
+     *
+     * The three parts are shown in the order a player needs them — is it still
+     * available, how do I walk there, what is the catch — rather than as one
+     * paragraph of prose. A prerequisite the save cannot verify (a gesture) is
+     * shown as "?" and never as satisfied: telling someone they already have it
+     * sends them to a tower where nothing happens.
+     */
+    function PlaceGuide({ d }) {
+      const p = d.places
+      if (!p?.items?.length) return null
+      const [openId, setOpenId] = useState(null)
+
+      return h(
+        'div',
+        { style: { marginTop: 16 } },
+        h(
+          'div',
+          { style: { display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 } },
+          h('div', { style: { fontSize: 12, color: C.text, fontWeight: 600 } }, '地点指引'),
+          h('span', { style: { fontSize: 10, color: C.sub } }, `${p.items.length} 条可做`),
+        ),
+        h(
+          'div',
+          { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
+          p.items.map((g) => {
+            const open = openId === g.id
+            const missable = g.missable
+            return h(
+              'div',
+              {
+                key: g.id,
+                style: {
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 6,
+                  borderLeft: `3px solid ${missable ? C.warn : C.done}`,
+                },
+              },
+              // Header: click to expand the route.
+              h(
+                'button',
+                {
+                  onClick: () => setOpenId(open ? null : g.id),
+                  style: {
+                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                    padding: '6px 10px', background: 'transparent', border: 'none',
+                    cursor: 'pointer', textAlign: 'left',
+                  },
+                },
+                h('span', { style: { fontSize: 12, color: C.text, flex: 1 } }, g.name.zh),
+                missable
+                  ? h(
+                      'span',
+                      { style: { fontSize: 9, color: C.warn, whiteSpace: 'nowrap' } },
+                      '可能锁死',
+                    )
+                  : null,
+                h('span', { style: { fontSize: 10, color: C.sub } }, open ? '收起' : '路线'),
+              ),
+              open
+                ? h(
+                    'div',
+                    { style: { padding: '0 10px 8px 10px' } },
+                    // ① status
+                    h(
+                      'div',
+                      { style: { fontSize: 10, color: C.sub, marginBottom: 6 } },
+                      h('span', {
+                        style: { color: g.status.state === 'owned' ? C.curr : C.sub },
+                      }, g.status.state === 'owned' ? '✔ ' : '○ '),
+                      g.status.evidence,
+                    ),
+                    // ② route
+                    g.where?.bonfireName
+                      ? h(
+                          'div',
+                          { style: { fontSize: 10, color: C.text, marginBottom: 4 } },
+                          `从篝火「${g.where.bonfireName}」出发`,
+                        )
+                      : null,
+                    h(
+                      'div',
+                      {
+                        style: {
+                          display: 'flex', flexDirection: 'column', gap: 2,
+                          marginBottom: 6, paddingLeft: 2,
+                        },
+                      },
+                      g.steps.map((s, i) =>
+                        h(
+                          'div',
+                          { key: i, style: { fontSize: 10, color: C.sub, lineHeight: 1.6 } },
+                          `${i + 1}. ${s}`,
+                        ),
+                      ),
+                    ),
+                    // ③ caveats — prerequisites first, then general warnings.
+                    g.requires?.length
+                      ? h(
+                          'div',
+                          { style: { marginBottom: 4 } },
+                          g.requires.map((r, i) =>
+                            h(
+                              'div',
+                              {
+                                key: i,
+                                style: { fontSize: 10, color: C.warn, lineHeight: 1.6 },
+                              },
+                              `${r.state === 'unknown' ? '?' : '✘'} 前置：${r.name}` +
+                                (r.from ? `（${r.from}）` : ''),
+                            ),
+                          ),
+                        )
+                      : null,
+                    g.warnings?.length
+                      ? h(
+                          'div',
+                          {
+                            style: {
+                              fontSize: 10, color: C.sub, lineHeight: 1.6,
+                              borderTop: `1px solid ${C.border}`, paddingTop: 4,
+                            },
+                          },
+                          g.warnings.slice(0, 3).map((w, i) =>
+                            h('div', { key: i }, `⚠ ${w}`),
+                          ),
+                        )
+                      : null,
+                    // Sources: the part the plugin is not allowed to paraphrase.
+                    g.sources?.length
+                      ? h(
+                          'div',
+                          { style: { marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 } },
+                          g.sources.map((s) =>
+                            h(
+                              'button',
+                              {
+                                key: s.id,
+                                title: s.url,
+                                onClick: () => {
+                                  window.open(s.url, '_blank', 'noopener')
+                                },
+                                style: {
+                                  fontSize: 9, padding: '1px 6px', borderRadius: 999,
+                                  cursor: 'pointer', border: `1px solid ${C.border}`,
+                                  background: 'transparent', color: C.sub,
+                                  maxWidth: 200, overflow: 'hidden',
+                                  textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                },
+                              },
+                              s.title,
+                            ),
+                          ),
+                        )
+                      : null,
+                  )
+                : null,
+            )
+          }),
+        ),
+      )
+    }
+
     // ---------------------------------------------------------------------
     // Composer pill: a single compact control in the composer tool row.
     //
@@ -1131,6 +1295,7 @@ window.__ModuleLoader__.load({
         h(MapCanvas, { d }),
         legend,
         h(NextSteps, { d }),
+        h(PlaceGuide, { d }),
         h(SteamAchievements, { d }),
         h(EndingList, { d }),
         h(AchievementList, { d }),
@@ -1199,6 +1364,7 @@ window.__ModuleLoader__.load({
         // missing.
         h(QuickAsks, {}),
         h(NextSteps, { d }),
+        h(PlaceGuide, { d }),
         h(SteamAchievements, { d }),
         h(EndingList, { d }),
         h(AchievementList, { d }),

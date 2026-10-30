@@ -3,12 +3,15 @@
   "_why": "游戏文本被加密的 BHD 索引挡着（8 个索引熵值均为 8.00/8.0），无法本地读取物品描述与地图坐标。这些页面填补这个缺口，但必须按链接引用而非复制正文。",
   "_licensing": {
     "huijiwiki": "灰机人机协议（https://www.huijiwiki.com/p/237）明确：批量自动获取需书面授权；且「针对 LLM 训练和 AI 应用所获取的本平台内容，不适用于任何版本的 CC 协议」。因此本插件不抓取、不缓存其正文，仅在用户点击时跳转。",
-    "ali213": "游侠网页面底部为「版权所有」。robots.txt 未禁止 /z/ 与 /html/ 路径，但版权保留意味着不可转载正文。同上：只给链接。"
+    "ali213": "游侠网页面底部为「版权所有」。robots.txt 未禁止 /z/ 与 /html/ 路径，但版权保留意味着不可转载正文。同上：只给链接。",
+    "gamersky": "游民星空页面同样标注版权保留。只记录标题与 URL，不转载正文、不转载它自带的截图。",
+    "fextralife": "Fextralife 的服务条款禁止抓取与用于 RAG/训练。本插件仅在运行时按需请求单个页面核对事实，不批量抓取、不建立本地副本；玩家看到的永远是原始链接。"
   },
   "_policy": {
     "store": "仅标题、URL、覆盖内容的一句话描述",
     "never": "正文段落、图片、表格数据",
-    "when_to_cite": "回答涉及具体物品位置、Boss 打法、NPC 支线、路线细节且无法从存档推导时"
+    "when_to_cite": "回答涉及具体物品位置、Boss 打法、NPC 支线、路线细节且无法从存档推导时",
+    "derived_facts": "places.json 里的 where/steps/requires/gotchas 是本项目自己写的事实性摘要（地点、前置、常见坑），不是上游页面的正文复制；每条都必须在 sources 里列出来源，供玩家自行核对。"
   },
   "sources": [
     {
@@ -67,6 +70,30 @@
       "covers": "中文术语、机制说明、背景设定",
       "use_for": ["术语对照", "机制解释"],
       "caveat": "站点自述仍在建设中，仅 217 条目，覆盖有限。"
+    },
+    {
+      "id": "fextra-yorshka",
+      "title": "Fextralife · Company Captain Yorshka",
+      "url": "https://darksouls3.wiki.fextralife.com/Company+Captain+Yorshka",
+      "covers": "约尔希卡的位置、加入暗月之剑所需姿势、击杀后果",
+      "use_for": ["暗月之剑", "誓约加入", "约尔希卡", "伊鲁席尔"],
+      "caveat": "英文。站点条款禁止抓取，仅作人工核对与时跳转。"
+    },
+    {
+      "id": "fextra-sirris",
+      "title": "Fextralife · Sirris of the Sunless Realms",
+      "url": "https://darksouls3.wiki.fextralife.com/Sirris+of+the+Sunless+Realms",
+      "covers": "希里丝支线全流程，含「暗月的誓约礼」姿势的取得步骤",
+      "use_for": ["希里丝支线", "暗月的誓约礼", "姿势获取", "NPC 任务线"],
+      "caveat": "英文。若已向罗莎莉亚献上发青舌头，该支线会中断，页面有说明。"
+    },
+    {
+      "id": "gamersky-darkmoon",
+      "title": "《黑暗之魂3》誓约暗月之剑奖杯攻略",
+      "url": "https://www.gamersky.com/handbook/201911/1242661.shtml",
+      "covers": "暗月之剑奖杯的中文达成步骤：先取姿势，再到阿诺尔隆德隐形路",
+      "use_for": ["暗月之剑", "成就攻略", "誓约加入"],
+      "caveat": "中文，面向奖杯。步骤描述较简，细节以 Fextralife 为准。"
     }
   ]
 }

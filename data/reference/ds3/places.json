@@ -1,0 +1,58 @@
+{
+  "_note": "地点指引库：回答「某样东西在哪里拿」。每条都是一份事实性摘要（在哪个区域、从哪个篝火出发、第几步看到什么、有什么前置和坑），不是上游攻略页的正文复制。",
+  "_why_this_exists": "存档能判断「你有没有」，但判断不了「在哪里拿」。物品位置、NPC 对话进度、隐形路、姿势前置都不在存档里。这个库只补这一段缺口，其余仍然只由存档回答。",
+  "_design": {
+    "three_parts": "每条都要能拼出三段：①状态（你有没有／能不能拿）②怎么去（从哪个篝火、几步）③注意（前置、坑、会不会锁死别的支线）。玩家问「在哪」时，这三段缺一不可。",
+    "saveCheck": "存档判定方式。kind=covenant 查誓约徽章；kind=item 查背包 ID；kind=boss 查 Boss 旗标；kind=unverifiable 表示存档看不出（例如姿势），此时 onlyIf 一律报 unknown，不许猜。",
+    "confidence": "high=多源一致或已逐条核对；medium=单一来源或细节可能过时。medium 的条目在回答时必须带不确定说明。",
+    "no_coordinates": "本库不给坐标、不给自制地图截图。只给「从哪个篝火出发 + 几步」。精细位置一律跳上游页面。"
+  },
+  "_source_policy": "每条必须在 sources 里列出来源 id（见 sources.json）。本条目的 where/steps/requires/gotchas 是本项目自己写的事实摘要，玩家可用 sources 里的链接自行核对。",
+
+  "places": [
+    {
+      "id": "darkmoon-covenant",
+      "kind": "covenant",
+      "name": { "zh": "暗月之剑", "en": "Blade of the Darkmoon" },
+      "aliases": ["暗月之剑", "Darkmoon", "Blade of the Darkmoon", "誓约暗月之剑"],
+      "where": {
+        "area": "伊鲁席尔",
+        "bonfireId": "13700000",
+        "bonfireName": "Church of Yorshka（幽尔希卡教堂）",
+        "landmark": "幽尔希卡教堂正上方的塔楼（Prison Tower），从教堂外侧的斜坡绕上去",
+        "note": "和一代去打画中世界的那座大教堂是同一处位置；塔只能单向从上方跳下，上去要靠外部斜坡。"
+      },
+      "steps": [
+        "传送到「幽尔希卡教堂」篝火（伊鲁席尔）",
+        "出篝火沿教堂外侧的斜坡绕到塔上",
+        "塔顶见到团长约尔希卡（Company Captain Yorshka）",
+        "在约尔希卡面前做出「暗月的誓约礼」姿势，然后下跪立誓"
+      ],
+      "requires": [
+        {
+          "kind": "gesture",
+          "name": "暗月的誓约礼",
+          "en": "Darkmoon Loyalty",
+          "from": "希里丝（Sirris of the Sunless Realms）支线",
+          "why": "没有这个姿势就无法与约尔希卡交互，塔顶站着也签不了约",
+          "saveVerifiable": false,
+          "ifMissing": "本周目加入不了暗月之剑，只能等下一周目"
+        }
+      ],
+      "gotchas": [
+        "击杀约尔希卡后，本周目无法向她献上「约定之证」，誓约等级永远升不上去（成就不受影响，但拿不到暗月光剑）。",
+        "如果在见到约尔希卡、并学会「暗月的誓约礼」之前，就向罗莎莉亚献上发青舌头，希里丝支线会中断，姿势也就拿不到了——这是本周目锁死的主要途径。"
+      ],
+      "missable": true,
+      "missableReason": "姿势来自 NPC 支线，支线可因献舌头而中断；中断后本周目无法补救。",
+      "achievement": {
+        "api": "ACH20",
+        "condition": "Discover Blade of the Darkmoon covenant.",
+        "note": "只要签约即解锁，不需要献上任何「约定之证」。刷 30 个是拿暗月光剑，和这个成就是两件事。"
+      },
+      "saveCheck": { "kind": "covenant", "id": "Blade of the Darkmoon" },
+      "sources": ["fextra-yorshka", "gamersky-darkmoon", "fextra-sirris"],
+      "confidence": "high"
+    }
+  ]
+}
