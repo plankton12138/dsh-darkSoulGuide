@@ -80,9 +80,12 @@ function formatState(o) {
   if (ends?.endings) {
     const done = ends.endings.filter((e) => e.state === 'done')
     const avail = ends.endings.filter((e) => e.state === 'available')
+    const unver = ends.endings.filter((e) => e.state === 'unverifiable')
     lines.push(
-      `结局：已达成 ${done.length ? done.map((e) => e.name).join('、') : '（无法确认）'}` +
-        `${avail.length ? `；现在可触发 ${avail.map((e) => e.name).join('、')}` : ''}`,
+      `结局：共 ${ends.total} 个，其中 ${ends.trackableTotal} 个有 Steam 成就。` +
+        `已达成 ${done.length ? done.map((e) => e.name).join('、') : '（无法确认）'}` +
+        `${avail.length ? `；现在可触发 ${avail.map((e) => e.name).join('、')}` : ''}` +
+        `${unver.length ? `；${unver.map((e) => e.name).join('、')} 没有成就也没有存档标记，无法核验，不要替玩家断言` : ''}`,
     )
   }
   const st = o.steam

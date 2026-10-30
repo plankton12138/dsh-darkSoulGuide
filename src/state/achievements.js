@@ -166,7 +166,7 @@ export function achievementStatus({ owned, bagNames, rings, axes, bosses, steam 
     name: '全部结局',
     group: 'story',
     verifiable: false,
-    reason: '结局的达成记录只存在于 Steam 成就里（见上面那一条）；存档分辨不出。三个结局的逐项状态见结局区块。',
+    reason: '结局的达成记录只存在于 Steam 成就里（见上面那一条）；存档分辨不出。四个结局里前三个可查 Steam，夺火没有任何记录，逐项状态见结局区块。',
   })
 
   const verifiable = entries.filter((e) => e.verifiable)

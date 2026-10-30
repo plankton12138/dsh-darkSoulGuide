@@ -16,6 +16,14 @@
  * ending where the flame is put out. Its Chinese name reads like "completing
  * the linking of the fire", which is close to the opposite. 初始之火的继承者
  * (To Link the First Flame) is the default one.
+ *
+ * There are FOUR endings but only THREE achievement ids. An earlier version
+ * read the achievement count as the ending count and said the game had three
+ * endings, dropping 夺火 (theft of fire) entirely. The fourth is real: it is a
+ * hidden branch inside the End of Fire cutscene, where you attack the Fire
+ * Keeper. It grants no achievement and leaves no save marker, so it is
+ * permanently unverifiable — reported as `unverifiable`, never as `done` and
+ * never as `locked`, because the save cannot tell either way.
  */
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -51,11 +59,18 @@ export async function endingStatus({ achievements = [], killedBosses = [] }) {
   const endings = doc.endings.map((e) => {
     const ach = e.achievement ? byApi[e.achievement] : null
     const reached = ach ? ach.unlocked === true : false
+    const untrackable = e.untrackable === true || !e.achievement
 
     let state
     let evidence
 
-    if (reached) {
+    if (untrackable) {
+      // No achievement, no save flag. Say so instead of guessing.
+      state = atFinalBonfire ? 'unverifiable' : 'locked'
+      evidence = atFinalBonfire
+        ? '这个结局没有成就、存档也不留标记，插件无法判断你拿过没有——只能由你自己确认。'
+        : '尚未击败薪王们的化身，还到不了最终篝火。'
+    } else if (reached) {
       state = 'done'
       const when = ach?.unlockedAt
         ? new Date(ach.unlockedAt * 1000).toISOString().slice(0, 10)
@@ -80,16 +95,20 @@ export async function endingStatus({ achievements = [], killedBosses = [] }) {
       prerequisites: e.prerequisites ?? [],
       stage: e.stage ?? null,
       state,
+      untrackable,
       evidence,
       notes: e.notes ?? null,
     }
   })
 
   const done = endings.filter((e) => e.state === 'done')
+  const untrackable = endings.filter((e) => e.untrackable)
   return {
     endings,
     reached: done.length,
     total: doc.endings.length,
+    trackableTotal: doc.endings.length - untrackable.length,
+    untrackableNames: untrackable.map((e) => e.name),
     reachedNames: done.map((e) => e.name),
     stillOpen: endings.filter((e) => e.state === 'available').map((e) => e.name),
     precedence: doc._precedence ?? [],

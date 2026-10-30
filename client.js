@@ -477,11 +477,11 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Endings: the condition, and what the save says about it.
+     * Endings: the condition, and what the save and Steam say about it.
      *
-     * Each row states its own evidence. Two of the four endings leave no
-     * readable mark in the save, so they are shown as "unverifiable" rather than
-     * counted — a completion count here would be a guess.
+     * Steam decides "reached it", the save decides "can reach it now". 夺火 has
+     * neither an achievement nor a save marker, so it renders as unverifiable —
+     * never counted, never called missing.
      */
     function EndingList({ d }) {
       const e = d.endings
@@ -490,7 +490,9 @@ window.__ModuleLoader__.load({
         done: { icon: '✔', color: C.done, label: '已达成' },
         available: { icon: '○', color: C.curr, label: '现在可触发' },
         locked: { icon: '·', color: C.sub, label: '还没到' },
+        unverifiable: { icon: '?', color: C.sub, label: '无法核验' },
       }
+      const FALLBACK = MARK.locked
       return h(
         'div',
         { style: { marginTop: 16 } },
@@ -499,7 +501,7 @@ window.__ModuleLoader__.load({
           'div',
           { style: { display: 'flex', flexDirection: 'column', gap: 6 } },
           e.endings.map((x) => {
-            const m = MARK[x.state] || MARK.possible
+            const m = MARK[x.state] || FALLBACK
             return h(
               'div',
               {
