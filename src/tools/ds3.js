@@ -152,7 +152,7 @@ export function registerTools(ctx) {
     ctx.tools.register({
       name: 'ds3_list_saves',
       description:
-        'List every Dark Souls III character in the local save file: name, level, souls held, and which data sections are readable. Call this first before answering anything about the player’s progress.',
+        'List every Dark Souls III character in the local save file: name, level, souls held, and which data sections are readable. The live state already names the active character and its save_id, so call this only when the save holds more than one character and you need to pick between them.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -191,14 +191,21 @@ export function registerTools(ctx) {
     ctx.tools.register({
       name: 'ds3_get_section',
       description:
-        'Read one data section of one Dark Souls III character. Call ds3_list_saves first to get save_id and the available sections. Sections load one at a time on purpose: the save holds thousands of progress flags, and dumping them all at once would flood the context.',
+        'Read one data section of one Dark Souls III character. save_id is the character name and is already printed in the live state, so no prior ds3_list_saves call is needed. Sections load one at a time on purpose: the save holds thousands of progress flags, and dumping them all at once would flood the context.',
       parameters: {
         type: 'object',
         additionalProperties: false,
         required: ['save_id', 'section'],
         properties: {
-          save_id: { type: 'string', description: 'save_id returned by ds3_list_saves.' },
-          section: { type: 'string', description: 'Section to read: character, bosses, progress, bonfires, equipment, or inventory.' },
+          save_id: {
+            type: 'string',
+            description: 'Character name. The live state prints it as "save_id: <name>".',
+          },
+          section: {
+            type: 'string',
+            description:
+              'Section to read: character, progress, bosses, inventory, equipment, bonfires, or endings.',
+          },
         },
       },
       output: { schema: SECTION_OUTPUT, render: renderSection },

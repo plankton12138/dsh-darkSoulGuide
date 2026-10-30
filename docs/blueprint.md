@@ -144,22 +144,38 @@ flag_id = 系统位 × 10^7 + 地图码 × 1000 + 局部号
 | 工具 | 参数 | 作用 |
 |---|---|---|
 | `ds3_overview` | `save_id?` | **一次调用拿到完整处境**：等级/位置/Boss/六条收集轴/缺哪些戒指法术 |
-| `ds3_list_saves` | `fresh?` | 列出角色与可用切片 |
-| `ds3_get_section` | `save_id`, `section` | 取一个切片 |
+| `ds3_get_section` | `save_id`, `section` | 取一个切片（`character` / `progress` / `bosses` / `inventory` / `equipment` / `bonfires` / `endings`） |
 | `ds3_plan_route` | `save_id?`, `from?`, `targets?` | 按连通图排访问顺序 |
+| `ds3_list_saves` | `fresh?` | 列出所有角色。**只在多角色时用**，单角色不必调 |
+| `ds3_place` | `name` | 三段式地点指引（状态／从哪个篝火怎么走／前置与坑） |
+| `ds3_sources` | `topic` | 出处链接；只给标题与 URL，不存正文 |
+| `ds3_diff_saves` | `save_a`, `save_b` | 比较两个存档的旗标差。**标定工具**，主要给开发者做未被收录旗标的映射 |
 
 **刻意不做的**：任何写存档的工具。见决策点 D2。
 
+### 4.2 指令层级：工具描述和提示词不能各说各的
+
+系统提示词、工具描述、工具返回的错误提示，三者都能约束模型，但**没有优先级约定**。人写的时候按「各自局部正确」写，合到一起就可能互斥；LLM 不会报告矛盾，它只会静默选一个，而且换模型、换上下文长度选的可能不同。症状是「有时好用有时不好用」，极难复现。
+
+真实踩到的例子：`ds3_list_saves` 描述写「Call this first before answering anything about the player's progress」，而 `GUIDE_RULES` 写「Start from the live state below」，两句每轮同时进上下文。更糟的是 `ds3_get_section` 要求 `save_id`，而 `save_id` 只在 `ds3_list_saves` 的返回值里——于是想用 `ds3_get_section` 就必须违反提示词的入口指令。
+
+修法不是二选一，而是**把信息放到模型本来就会看的地方**：
+
+- `save_id` 就是角色名（`run.js` 里两者同赋自 `identity.saveName`），已经写在 state 第一行，只是没标名分。现在写成 `角色：plankton（save_id: plankton）`。
+- `ds3_list_saves` 与 `ds3_get_section` 的描述改成「多角色时才需要」，不再声称必须首先调用。
+
+`tests/prompt-state.mjs` 把这份契约钉住：state 必须带 `save_id`，且没有任何描述重新出现「call this first」。**判断标准：一个事实如果 state 里已经有了，就不该再要求模型付出一次调用来拿它。**
+
 ### 4.1 工具挂在预设里，不是全局
 
-这是 0.3 的架构决定。若把四个工具与人格段注册到全局，**每个会话**（写代码、查资料）都会背上黑魂3 的工具 schema 和「你是黑魂3 攻略」的人格段——既污染上下文，也让模型在无关任务里选错工具。
+这是 0.3 的架构决定。若把七个工具与人格段注册到全局，**每个会话**（写代码、查资料）都会背上黑魂3 的工具 schema 和「你是黑魂3 攻略」的人格段——既污染上下文，也让模型在无关任务里选错工具。
 
 因此按 config 拆两半：
 
 | 挂载点 | config | 提供 |
 |---|---|---|
 | profile 行（本 bundle 第一行） | `tools:false, prompt:false, panel:true` | `/darksouls-guide/progress` 路由、侧栏地图 |
-| 预设行 `preset-ds3-guide` | `tools:true, prompt:true, panel:false` | 四个模型工具、人格段、存档上下文 |
+| 预设行 `preset-ds3-guide` | `tools:true, prompt:true, panel:false` | 七个模型工具、人格段、存档上下文 |
 
 `apply()` 用 `config.tools/prompt/panel` 分流，两个挂载点共用一份代码。可验证的结论：当前标准会话的 `listTools` 里**一个 `ds3_` 都没有**，隔离成立。
 

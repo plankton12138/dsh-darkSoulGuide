@@ -52,10 +52,16 @@ Achievements and endings:
 let cache = { at: 0, text: null, pending: null }
 const CACHE_MS = 15_000
 
-function formatState(o) {
+/** Exported for the prompt-state test: the shape of the state line is a contract. */
+export function formatState(o) {
   const c = o.character
   const lines = []
-  lines.push(`角色：${c.name}｜Lv${c.level}｜${c.playtimeHours ?? '?'} 小时｜当前在「${c.area || '未知'}」`)
+  // save_id is the character name, and it is the argument ds3_get_section
+  // takes. Printing it here removes the reason to call ds3_list_saves just to
+  // learn something the live state already knows — that call used to be
+  // demanded by one tool description while the rules said to start from the
+  // state, and the two instructions arrived together on every turn.
+  lines.push(`角色：${c.name}（save_id: ${o.save_id ?? c.name}）｜Lv${c.level}｜${c.playtimeHours ?? '?'} 小时｜当前在「${c.area || '未知'}」`)
   lines.push(`Boss：${o.bosses.killed}/${o.bosses.total}${o.bosses.alive.length ? `，未击败：${o.bosses.alive.join('、')}` : ''}`)
   lines.push('收集：')
   for (const row of o.summary) lines.push(`  ${row.label} ${row.have}/${row.total}`)
