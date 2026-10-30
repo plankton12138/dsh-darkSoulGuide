@@ -133,7 +133,7 @@ export async function readSection(saveId, section) {
     throw new Ds3Error(
       'unknown_section',
       `角色「${hit.name}」没有名为「${section}」的数据切片`,
-      `可用切片：${available.join('、')}。当前版本只映射了 character，其余（事件旗标、装备、背包）尚未实现。`,
+      `可用切片：${available.join('、')}。切片名要完全一致，请从这份列表里选。`,
     )
   }
   return { save_id: hit.save_id, section, description: data.description, data: data.data }

@@ -264,6 +264,76 @@ window.__ModuleLoader__.load({
       return state
     }
 
+    /**
+     * Force a re-read instead of waiting for the 60s poll to come round.
+     *
+     * The server has always honoured `?fresh=1` (index.js invalidates the
+     * prompt cache on it) but nothing in the client ever sent it, so the
+     * first-run advice "refresh here" had no control behind it: a player who
+     * just created a character had no way to make the panel notice.
+     */
+    function useRefresh() {
+      const [busy, setBusy] = useState(false)
+      const run = () => {
+        if (busy) return
+        setBusy(true)
+        fetch('/darksouls-guide/progress?fresh=1')
+          .then((r) => r.json())
+          .then((d) => publish({ loading: false, data: d }))
+          .catch((e) => publish({ loading: false, error: String(e) }))
+          .finally(() => setBusy(false))
+      }
+      return [busy, run]
+    }
+
+    function RefreshButton() {
+      const [busy, run] = useRefresh()
+      return h(
+        'button',
+        {
+          onClick: run,
+          disabled: busy,
+          title: '重新读取存档，不等 60 秒轮询',
+          style: {
+            fontSize: 11, lineHeight: 1.4, padding: '2px 8px', height: 22,
+            borderRadius: 999, whiteSpace: 'nowrap',
+            cursor: busy ? 'default' : 'pointer',
+            border: `1px solid ${C.border}`, background: 'transparent',
+            color: busy ? C.sub : C.text,
+          },
+        },
+        busy ? '读取中…' : '重新读取',
+      )
+    }
+
+    /** The pill's popup shell. One shape, two states, so they cannot drift. */
+    function Popup({ children }) {
+      return h(
+        'div',
+        {
+          style: {
+            position: 'absolute', bottom: 28, left: 0, zIndex: 40,
+            width: 236, padding: 10,
+            border: `1px solid ${C.border}`, borderRadius: 8,
+            background: 'var(--dsw-alias-bg-layer-1, #1b1b1b)',
+            boxShadow: '0 6px 24px rgba(0,0,0,.45)',
+            display: 'flex', flexDirection: 'column', gap: 7,
+          },
+        },
+        children,
+      )
+    }
+
+    /** A flat status dot, used where a full pill would claim more than it knows. */
+    function Dot({ color }) {
+      return h('span', {
+        style: {
+          width: 6, height: 6, borderRadius: 999,
+          background: color, display: 'inline-block', flex: '0 0 auto',
+        },
+      })
+    }
+
     function MapCanvas({ d }) {
       const [hover, setHover] = useState(null)
       // Per-node click feedback. Held here rather than inside the map callback
@@ -433,39 +503,138 @@ window.__ModuleLoader__.load({
      * Anyone installing this from the public repository starts without a save
      * file, so this is the first screen most new users see. "读不到存档" alone
      * is a dead end; the hint is what turns it into something actionable.
+     *
+     * The lines are split from the shell because the composer pill shows the
+     * same wording inside a narrow popup. One source, two seats.
      */
-    function SaveError({ d, error, compact }) {
+    function FailureLines({ d, error }) {
       const reason = d?.reason || error || '未知原因'
       const hint = d?.hint || null
       const code = d?.code || null
+
+      const rows = [
+        h('div', { key: 'reason', style: { color: C.warn } }, `读不到存档：${reason}`),
+      ]
+      if (hint) rows.push(h('div', { key: 'hint' }, hint))
+
+      const NEXT = {
+        no_save: '装好插件但还没进过游戏？先创建角色并保存一次，再刷新这里。',
+        no_character: '存档能打开，但里面还没有角色。进游戏创建一个并保存一次。',
+        python_missing: '解析器需要本机的 Python 3。装好后重开应用。',
+        dependency_missing: '需要 cryptography：在终端执行 pip install cryptography。',
+      }
+      if (NEXT[code]) {
+        rows.push(h('div', { key: 'next', style: { marginTop: 8, opacity: 0.85 } }, NEXT[code]))
+      }
+      return h('div', null, rows)
+    }
+
+    function SaveError({ d, error, compact }) {
       const pad = compact ? 16 : 24
       const size = compact ? 12 : 13
       return h(
         'div',
         { style: { padding: pad, color: C.sub, fontSize: size, lineHeight: 1.8, fontFamily: 'inherit' } },
-        h('div', { style: { color: C.warn, marginBottom: 6 } }, `读不到存档：${reason}`),
-        hint ? h('div', null, hint) : null,
-        code === 'no_save'
-          ? h(
+        h(FailureLines, { d, error }),
+      )
+    }
+
+    /**
+     * What a first run can be missing, in the order it bites.
+     *
+     * The parser reports one failure code, so the panel knows *which* check
+     * failed and nothing about the others. The remaining rows say "未检查"
+     * rather than showing a tick we cannot prove — a green check drawn from
+     * absence of evidence is the same class of lie as a percentage we cannot
+     * derive.
+     */
+    const CHECKS = [
+      {
+        id: 'python', label: 'Python 3', codes: ['python_missing'],
+        cmd: 'python --version', why: '没有它，解析器启动不了',
+      },
+      {
+        id: 'crypto', label: 'cryptography', codes: ['dependency_missing'],
+        cmd: 'pip install cryptography', why: '解存档的 AES 容器要用',
+      },
+      {
+        id: 'save', label: 'DS3 存档文件', codes: ['no_save', 'no_character'],
+        cmd: '%APPDATA%\\DarkSoulsIII\\*\\DS30000.sl2', why: '游戏存档的默认位置',
+      },
+    ]
+
+    /** A command with a copy button, so the fix does not have to be retyped. */
+    function CopyCmd({ text }) {
+      const [copied, setCopied] = useState(false)
+      const copy = () => {
+        try {
+          navigator.clipboard?.writeText(text)
+          setCopied(true)
+          setTimeout(() => setCopied(false), 1200)
+        } catch {
+          setCopied(false)
+        }
+      }
+      return h(
+        'div',
+        { style: { display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 } },
+        h(
+          'code',
+          {
+            style: {
+              fontSize: 11, padding: '1px 5px', borderRadius: 4,
+              background: C.idle, color: C.text,
+              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+              wordBreak: 'break-all',
+            },
+          },
+          text,
+        ),
+        h(
+          'button',
+          {
+            onClick: copy,
+            title: '复制',
+            style: {
+              fontSize: 10, lineHeight: 1.4, padding: '1px 6px', borderRadius: 999,
+              cursor: 'pointer', whiteSpace: 'nowrap',
+              border: `1px solid ${C.border}`, background: 'transparent',
+              color: copied ? C.done : C.sub,
+            },
+          },
+          copied ? '已复制' : '复制',
+        ),
+      )
+    }
+
+    function Checklist({ d }) {
+      const code = d?.code || null
+      return h(
+        'div',
+        { style: { marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 } },
+        h('div', { style: { fontSize: 11, color: C.sub } }, '逐项确认 —— 缺哪一项就卡在哪一步'),
+        CHECKS.map((c) => {
+          const failed = c.codes.includes(code)
+          return h(
+            'div',
+            {
+              key: c.id,
+              style: {
+                border: `1px solid ${failed ? C.warn : C.border}`,
+                borderRadius: 6, padding: '6px 8px',
+                fontSize: 11, lineHeight: 1.7, color: C.sub,
+              },
+            },
+            h(
               'div',
-              { style: { marginTop: 8, opacity: 0.85 } },
-              '装好插件但还没进过游戏？先创建角色并保存一次，再刷新这里。',
-            )
-          : null,
-        code === 'python_missing'
-          ? h(
-              'div',
-              { style: { marginTop: 8, opacity: 0.85 } },
-              '解析器需要本机的 Python 3。装好后重开应用。',
-            )
-          : null,
-        code === 'dependency_missing'
-          ? h(
-              'div',
-              { style: { marginTop: 8, opacity: 0.85 } },
-              '需要 cryptography：在终端执行 pip install cryptography。',
-            )
-          : null,
+              { style: { display: 'flex', justifyContent: 'space-between', gap: 8 } },
+              h('span', { style: { color: failed ? C.warn : C.text } }, c.label),
+              h('span', null, failed ? '这项有问题' : '未检查'),
+            ),
+            h('div', null, c.why),
+            h(CopyCmd, { text: c.cmd }),
+          )
+        }),
       )
     }
 
@@ -1025,9 +1194,61 @@ window.__ModuleLoader__.load({
         return () => document.removeEventListener('mousedown', onDown)
       }, [open])
 
-      // Unreadable save: stay out of the composer entirely rather than
-      // occupying the tool row of every session with an error.
-      if (!d || !d.ok) return null
+      // Still on the very first read: stay quiet rather than flash an error
+      // that may be gone in 200 ms.
+      if (st.loading && !d) return null
+
+      // Unreadable save. This used to `return null`, which turned "I cannot
+      // see your save" into "I am not here": the pill is the only always-on
+      // surface this plugin has, so a silent disappearance reads as "not
+      // installed" rather than "one thing is missing". A muted pill that
+      // states the reason is the honest version, and it is still one small
+      // control in the tool row rather than a strip of its own.
+      if (!d || !d.ok) {
+        return h(
+          'div',
+          { ref: wrap, style: { position: 'relative', display: 'inline-flex' } },
+          h(
+            'button',
+            {
+              onClick: () => setOpen((v) => !v),
+              title: `黑魂3 进度：${d?.reason || st.error || '未读取'}`,
+              style: {
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 11, lineHeight: 1.4, padding: '2px 8px', height: 22,
+                borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap',
+                border: `1px solid ${open ? C.warn : C.border}`,
+                background: 'transparent',
+                color: open ? C.warn : C.sub,
+              },
+            },
+            h(Dot, { color: open ? C.warn : C.sub }),
+            '黑魂3',
+          ),
+          open
+            ? h(
+                Popup,
+                null,
+                h(
+                  'div',
+                  { style: { fontSize: 11, color: C.sub, lineHeight: 1.7 } },
+                  h(FailureLines, { d, error: st.error }),
+                ),
+                h(
+                  'div',
+                  {
+                    style: {
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'space-between', gap: 6, marginTop: 2,
+                    },
+                  },
+                  h(RefreshButton, null),
+                  h('span', { style: { fontSize: 10, color: C.sub } }, '侧栏有逐项检查'),
+                ),
+              )
+            : null,
+        )
+      }
 
       const c = d.character
       const left = (d.summary || []).filter((r) => r.have < r.total)
@@ -1088,17 +1309,8 @@ window.__ModuleLoader__.load({
         ),
         open
           ? h(
-              'div',
-              {
-                style: {
-                  position: 'absolute', bottom: 28, left: 0, zIndex: 40,
-                  width: 236, padding: 10,
-                  border: `1px solid ${C.border}`, borderRadius: 8,
-                  background: 'var(--dsw-alias-bg-layer-1, #1b1b1b)',
-                  boxShadow: '0 6px 24px rgba(0,0,0,.45)',
-                  display: 'flex', flexDirection: 'column', gap: 7,
-                },
-              },
+              Popup,
+              null,
               h(
                 'div',
                 { style: { display: 'flex', justifyContent: 'space-between', fontSize: 11 } },
@@ -1248,10 +1460,31 @@ window.__ModuleLoader__.load({
               `${d.character.name} Lv${d.character.level}｜Boss ${d.bosses.killed}/${d.bosses.total}｜${d.character.playtimeHours} 小时`,
             )
           : null,
+        // Always present: the 60s poll is fine for a running game, useless
+        // right after creating a character.
+        h('div', { style: { marginLeft: 'auto' } }, h(RefreshButton, null)),
       )
 
       if (st.loading) return h('div', { style: { padding: 24, color: C.sub } }, '读取存档…')
-      if (!d || !d.ok) return h(SaveError, { d, error: st.error })
+      if (!d || !d.ok) {
+        return h(
+          'div',
+          {
+            style: {
+              padding: '18px 22px', height: '100%', overflowY: 'auto',
+              boxSizing: 'border-box', fontFamily: 'inherit',
+            },
+          },
+          head,
+          h(SaveError, { d, error: st.error }),
+          h(Checklist, { d }),
+          h(
+            'div',
+            { style: { marginTop: 14, fontSize: 11, color: C.sub, lineHeight: 1.7 } },
+            '改好之后点上面的「重新读取」。',
+          ),
+        )
+      }
 
       const axes = h(
         'div',
@@ -1335,7 +1568,17 @@ window.__ModuleLoader__.load({
       const st = useProgress(60000)
       const d = st.data
       if (st.loading) return h('div', { style: { padding: 16, color: C.sub, fontSize: 12 } }, '读取存档…')
-      if (!d || !d.ok) return h(SaveError, { d, error: st.error, compact: true })
+      if (!d || !d.ok) {
+        // Same two blocks as the full page: a broken right pane that only says
+        // "cannot read the save" leaves the player with no next step.
+        return h(
+          'div',
+          { style: { padding: 12, overflowY: 'auto', height: '100%', boxSizing: 'border-box' } },
+          h(SaveError, { d, error: st.error, compact: true }),
+          h(Checklist, { d }),
+          h('div', { style: { marginTop: 10 } }, h(RefreshButton, null)),
+        )
+      }
       const left = (d.summary || []).filter((r) => r.have < r.total)
       return h(
         'div',

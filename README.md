@@ -2,7 +2,7 @@
 
 一个能**读你存档**的《黑暗之魂3》攻略助手。它知道你打到哪、杀了谁、还差哪些篝火和戒指，然后回答「接下来该干什么」。
 
-> 状态：**0.11.0**。六条收集轴、五个模型工具、独立 Agent 预设、输入框进度药丸、侧边栏地点指引。已在 DSH 里读出真实进度。设计见 [docs/blueprint.md](docs/blueprint.md)。
+> 状态：**0.11.2**。六条收集轴、七个模型工具、独立 Agent 预设、输入框进度药丸、侧边栏地点指引。已在 DSH 里读出真实进度。设计见 [docs/blueprint.md](docs/blueprint.md)。
 
 ## 装好之后怎么用
 
@@ -133,4 +133,10 @@ node tests\smoke-progress.mjs http://127.0.0.1:<端口>
 
 ```powershell
 node tests\no-save.mjs
+```
+
+面板和药丸的首次渲染不依赖运行中的应用，可以直接跑：
+
+```powershell
+node tests\client-render.mjs
 ```
