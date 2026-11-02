@@ -39,6 +39,11 @@
               edit: false
           - id: tool-fs-search
             name: '@deepseek-ai/dsh-tool-fs-search'
+            # Required, no fallback. Omitting it does not default to anything:
+            # the plugin's schema rejects the config and the whole preset fails
+            # to load with "loaded failed" and no hint about which field.
+            config:
+              sampleOverCapGlobResults: false
           - id: tool-web
             name: '@deepseek-ai/dsh-tool-web'
             config:
@@ -48,6 +53,10 @@
             name: '@deepseek-ai/dsh-tool-ask-user'
           - id: tool-todo
             name: '@deepseek-ai/dsh-tool-todo'
+            # Also required with no default. true lets several todos sit in
+            # progress at once, which is what an agent doing fan-out work needs.
+            config:
+              allowParallelInProgress: true
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
           - id: tool-skill

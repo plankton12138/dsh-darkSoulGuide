@@ -179,6 +179,16 @@ flag_id = 系统位 × 10^7 + 地图码 × 1000 + 局部号
 
 `apply()` 用 `config.tools/prompt/panel` 分流，两个挂载点共用一份代码。可验证的结论：当前标准会话的 `listTools` 里**一个 `ds3_` 都没有**，隔离成立。
 
+### 4.3 必填配置没有默认值
+
+预设里挂载的第三方插件，有些字段是**必填且无默认值**的。漏了不会退化成默认值，而是该插件的 schema 校验失败 → 整个预设「加载失败」，界面上只列出字段名，不说该改哪个文件。
+
+踩到的两处：`@deepseek-ai/dsh-tool-fs-search` 的 `sampleOverCapGlobResults`、`@deepseek-ai/dsh-tool-todo` 的 `allowParallelInProgress`。两个都是 DSH 自带组合里显式给了值的（`false` / `true`），这里是照抄时把整个 `config:` 块漏掉了。
+
+**判断标准：抄一段组合时，`config:` 块和 `name:` 一样重要。** 这两行在 YAML 层面完全合法，只有 DSH 真正装配它时才会炸——所以本地 `yaml.load` 通过不代表能加载。
+
+`tests/preset-config.mjs` 把这两条钉住，并且带行解析自检：一个匹配不到任何东西的守卫，会永远报告「通过」。
+
 ---
 
 ## 5. 进度轴：从「篝火数」到「还缺什么」
@@ -675,6 +685,24 @@ darksoulGuide/
 | `archive/` | DSR 时代遗留：无来源数据、失去依赖的旧解析器 |
 
 `.gitignore` 用通配而不是逐个目录列，因为最初只写了 `tests/fixtures/saves/`，结果 `tests/fixtures/ds3/` 下 4 个 9MB 存档一个都没被排除。
+
+**同一个坑在 npm 那边又踩了一次。** 第一次准备发布时 `npm pack --dry-run` 打出 **42 MB**：`files` 字段里写着 `tests/**`，而 **npm 的 `files` 优先于 `.gitignore`**，于是 4 个 DS3 存档、1 个 DSR 存档和那个 `steam_autocloud.vdf` 全在包里。也就是说 git 侧修过、npm 侧没修——**两套忽略规则，一个存档文件在两边都是个人数据**。
+
+现在 `files` 只列运行时真正需要的东西，并且有 `tests/packaging.mjs` 直接对 `npm pack` 的产物断言：体积、禁入模式、运行时文件是否齐全、`private` 是否已移除、`engines.dsh` 是否声明。禁入正则还有一条自检——**一个匹配不到任何东西的规则永远报「干净」**，这正是这个文件要防的失效方式（`\\.pyc` 曾写成一个字面反斜杠，因为包里没有 `.pyc` 而一直没被发现）。
+
+`tests/` 不打进包：它依赖的夹具**正确地**不会发布，所以发出去的那份测试对任何跑它的人都会失败。
+
+`items.json` 的来源在 `_source` 里如实写明：上游 `ds3-advisor` **声明无授权**，本仓库只复现事实性游戏数据（数字 ID 与游戏内显示名），不含任何源码、游戏二进制或资源文件。LICENSE 里也单列了这一点。
+
+### 分发的三条路
+
+| 路径 | 谁能用 | 代价 |
+|---|---|---|
+| npm 发布 + 提 PR 到 `awesome-dsh-plugin` | 市场用户一键装 | 目录重建约一天；**这是唯一能让普通用户装上的路**，因为市场只允许从 curated registry 里的源安装 |
+| 自建 format-1 index（Discover → Index sources） | 愿意手动加源的用户 | 自己托管 index.json |
+| `dsh plugin add github:<owner>/<repo>#<commit>` | 开发者、自己 | 拉整仓源码 |
+
+发布包的形状（`files` 不拒绝 `tools/ds3/dump_save.py`、`client.js` 是提交在仓库里的成品不需要构建）是它能走 npm 一线的前提：装完就能跑。
 
 `items.json` 的来源在 `_source` 里如实写明：上游 `ds3-advisor` **声明无授权**，本仓库只复现事实性游戏数据（数字 ID 与游戏内显示名），不含任何源码、游戏二进制或资源文件。LICENSE 里也单列了这一点。
 

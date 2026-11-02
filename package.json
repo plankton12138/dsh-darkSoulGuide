@@ -1,9 +1,25 @@
 {
   "name": "dsh-darksouls-guide",
-  "version": "0.11.3",
-  "private": true,
+  "version": "0.11.4",
   "type": "module",
   "description": "Dark Souls III 存档感知攻略助手：读存档、答攻略、规划路线，附区域进度图",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plankton12138/dsh-darkSoulGuide.git"
+  },
+  "homepage": "https://github.com/plankton12138/dsh-darkSoulGuide#readme",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "dark-souls-3",
+    "save-file",
+    "game-guide"
+  ],
+  "engines": {
+    "dsh": ">=0.2.1-rc.1 <0.3.0"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
@@ -16,10 +32,10 @@
     "cordis.patch.yml",
     "locale/*.json",
     "icon.svg",
+    "NOTICE.md",
     "src/**/*.js",
-    "tools/**",
-    "data/reference/**",
-    "tests/**"
+    "tools/ds3/dump_save.py",
+    "data/reference/**"
   ],
   "dsh": {
     "bundle": {
